@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Car, LogIn, UserPlus, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
@@ -36,25 +37,26 @@ const Auth = () => {
     setIsSubmitting(true);
     setError(null);
 
-    if (!loginForm.email || !loginForm.password) {
+    const email = loginForm.email.trim().toLowerCase();
+
+    if (!email || !loginForm.password) {
       setError('Bitte füllen Sie alle Felder aus');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const { error } = await signIn(loginForm.email, loginForm.password);
-      
+      const { error } = await signIn(email, loginForm.password);
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          setError('Ungültige E-Mail oder Passwort');
+          setError('Ungültige Zugangsdaten oder E-Mail nicht bestätigt.');
         } else {
           setError(error.message);
         }
       } else {
         toast.success('Erfolgreich angemeldet');
       }
-    } catch (error) {
+    } catch {
       setError('Ein unerwarteter Fehler ist aufgetreten');
     } finally {
       setIsSubmitting(false);
@@ -66,7 +68,9 @@ const Auth = () => {
     setIsSubmitting(true);
     setError(null);
 
-    if (!signupForm.email || !signupForm.password || !signupForm.confirmPassword) {
+    const email = signupForm.email.trim().toLowerCase();
+
+    if (!email || !signupForm.password || !signupForm.confirmPassword) {
       setError('Bitte füllen Sie alle Felder aus');
       setIsSubmitting(false);
       return;
@@ -85,7 +89,7 @@ const Auth = () => {
     }
 
     try {
-      const { error } = await signUp(signupForm.email, signupForm.password);
+      const { error } = await signUp(email, signupForm.password);
       
       if (error) {
         if (error.message.includes('User already registered')) {
@@ -94,12 +98,31 @@ const Auth = () => {
           setError(error.message);
         }
       } else {
-        toast.success('Registrierung erfolgreich! Sie können sich jetzt anmelden.');
+        toast.success('Registrierung erfolgreich! Prüfen Sie Ihre E-Mail zur Bestätigung oder melden Sie sich direkt an, falls Bestätigung deaktiviert ist.');
         // Reset form and switch to login tab
         setSignupForm({ email: '', password: '', confirmPassword: '' });
       }
-    } catch (error) {
+    } catch {
       setError('Ein unerwarteter Fehler ist aufgetreten');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resendEmail = async () => {
+    const email = loginForm.email.trim().toLowerCase();
+    if (!email) {
+      setError('Bitte geben Sie Ihre E-Mail im Login-Formular ein.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      if (error) {
+        setError(error.message);
+      } else {
+        toast.success('Bestätigungs-E-Mail erneut gesendet.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -197,6 +220,18 @@ const Auth = () => {
                   >
                     {isSubmitting ? 'Wird angemeldet...' : 'Anmelden'}
                   </Button>
+                  <div className="mt-2 text-xs text-muted-foreground text-center">
+                    <span>Noch keine Bestätigung erhalten? </span>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-1"
+                      onClick={resendEmail}
+                      disabled={isSubmitting || !loginForm.email}
+                    >
+                      E-Mail erneut senden
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
 
