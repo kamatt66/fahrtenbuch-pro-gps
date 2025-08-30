@@ -9,7 +9,8 @@ import {
   BarChart3, 
   Settings,
   Menu,
-  X
+  X,
+  Euro
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +24,7 @@ const navigationItems = [
   { id: "trips", label: "Fahrten", icon: MapPin },
   { id: "vehicles", label: "Fahrzeuge", icon: Car },
   { id: "drivers", label: "Fahrer", icon: Users },
-  { id: "fuel", label: "Tanken", icon: Fuel },
+  { id: "costs", label: "Kosten", icon: Euro },
   { id: "statistics", label: "Statistiken", icon: BarChart3 },
   { id: "settings", label: "Einstellungen", icon: Settings },
 ];

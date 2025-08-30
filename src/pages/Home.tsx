@@ -5,6 +5,7 @@ import VehicleManagement from "@/components/VehicleManagement";
 import DriverManagement from "@/components/DriverManagement";
 import TripRecorder from "@/components/TripRecorder";
 import TripList from "@/components/TripList";
+import CostManagement from "@/components/CostManagement";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
