@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      trips: {
+        Row: {
+          bluetooth_device: string | null
+          created_at: string
+          distance_km: number | null
+          driver_name: string
+          end_latitude: number | null
+          end_location: string | null
+          end_longitude: number | null
+          end_time: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          purpose: string | null
+          start_latitude: number | null
+          start_location: string | null
+          start_longitude: number | null
+          start_time: string
+          updated_at: string
+          user_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          bluetooth_device?: string | null
+          created_at?: string
+          distance_km?: number | null
+          driver_name: string
+          end_latitude?: number | null
+          end_location?: string | null
+          end_longitude?: number | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          purpose?: string | null
+          start_latitude?: number | null
+          start_location?: string | null
+          start_longitude?: number | null
+          start_time?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          bluetooth_device?: string | null
+          created_at?: string
+          distance_km?: number | null
+          driver_name?: string
+          end_latitude?: number | null
+          end_location?: string | null
+          end_longitude?: number | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          purpose?: string | null
+          start_latitude?: number | null
+          start_location?: string | null
+          start_longitude?: number | null
+          start_time?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
