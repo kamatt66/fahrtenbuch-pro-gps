@@ -27,7 +27,7 @@ export type Database = {
           receipt_number: string | null
           recurring_interval: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
           vehicle_id: string | null
           vendor: string | null
         }
@@ -43,7 +43,7 @@ export type Database = {
           receipt_number?: string | null
           recurring_interval?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           vehicle_id?: string | null
           vendor?: string | null
         }
@@ -59,9 +59,63 @@ export type Database = {
           receipt_number?: string | null
           recurring_interval?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           vehicle_id?: string | null
           vendor?: string | null
+        }
+        Relationships: []
+      }
+      drivers: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          license_expiry: string | null
+          license_number: string | null
+          monthly_km: number
+          phone: string | null
+          status: string
+          total_km: number
+          total_trips: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          license_expiry?: string | null
+          license_number?: string | null
+          monthly_km?: number
+          phone?: string | null
+          status?: string
+          total_km?: number
+          total_trips?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          license_expiry?: string | null
+          license_number?: string | null
+          monthly_km?: number
+          phone?: string | null
+          status?: string
+          total_km?: number
+          total_trips?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -81,7 +135,7 @@ export type Database = {
           receipt_number: string | null
           total_amount: number
           updated_at: string
-          user_id: string | null
+          user_id: string
           vehicle_id: string | null
         }
         Insert: {
@@ -99,7 +153,7 @@ export type Database = {
           receipt_number?: string | null
           total_amount: number
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           vehicle_id?: string | null
         }
         Update: {
@@ -117,8 +171,41 @@ export type Database = {
           receipt_number?: string | null
           total_amount?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           vehicle_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -141,7 +228,7 @@ export type Database = {
           start_longitude: number | null
           start_time: string
           updated_at: string
-          user_id: string | null
+          user_id: string
           vehicle_id: string | null
         }
         Insert: {
@@ -162,7 +249,7 @@ export type Database = {
           start_longitude?: number | null
           start_time?: string
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           vehicle_id?: string | null
         }
         Update: {
@@ -183,8 +270,29 @@ export type Database = {
           start_longitude?: number | null
           start_time?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           vehicle_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -203,7 +311,7 @@ export type Database = {
           status: string
           total_km: number
           updated_at: string
-          user_id: string | null
+          user_id: string
           year: number | null
         }
         Insert: {
@@ -220,7 +328,7 @@ export type Database = {
           status?: string
           total_km?: number
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           year?: number | null
         }
         Update: {
@@ -237,7 +345,7 @@ export type Database = {
           status?: string
           total_km?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           year?: number | null
         }
         Relationships: []
@@ -247,10 +355,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "driver" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -377,6 +495,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "driver", "user"],
+    },
   },
 } as const
