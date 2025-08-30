@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, Users, MapPin, Fuel, BarChart3, Plus } from "lucide-react";
 import { useVehicles } from "@/hooks/useVehicles";
+import { useTrips } from "@/hooks/useTrips";
+import { useFuelRecords } from "@/hooks/useFuelRecords";
+import { useMemo } from "react";
 interface DashboardProps {
   onTabChange?: (tab: string) => void;
 }
@@ -30,6 +33,41 @@ const StatCard = ({ title, value, icon, description, trend }: StatCardProps) => 
 
 const Dashboard = ({ onTabChange }: DashboardProps) => {
   const { vehicles, loading } = useVehicles();
+  const { trips } = useTrips();
+  const { fuelRecords } = useFuelRecords();
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    const currentMonthTrips = trips.filter(trip => {
+      const tripDate = new Date(trip.start_time);
+      return tripDate.getMonth() === currentMonth && tripDate.getFullYear() === currentYear;
+    });
+
+    const currentMonthFuel = fuelRecords.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
+    });
+
+    const totalDistance = currentMonthTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0);
+    const totalFuelCost = currentMonthFuel.reduce((sum, record) => sum + (record.total_amount || 0), 0);
+    const totalFuelAmount = currentMonthFuel.reduce((sum, record) => sum + (record.fuel_amount || 0), 0);
+    
+    const avgConsumption = totalDistance > 0 && totalFuelAmount > 0 
+      ? (totalFuelAmount / totalDistance) * 100 
+      : 0;
+
+    return {
+      totalTrips: currentMonthTrips.length,
+      totalDistance: Math.round(totalDistance * 10) / 10,
+      totalFuelCost: Math.round(totalFuelCost * 100) / 100,
+      avgConsumption: Math.round(avgConsumption * 10) / 10
+    };
+  }, [trips, fuelRecords]);
+
+  const recentTrips = trips.slice(0, 5);
 
   const handleNewTrip = () => {
     onTabChange?.('trips');
@@ -82,25 +120,25 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Gesamte Fahrten"
-          value="0"
+          value={stats.totalTrips.toString()}
           icon={<MapPin className="h-4 w-4" />}
           description="Diesen Monat"
         />
         <StatCard
           title="Gefahrene Kilometer"
-          value="0 km"
+          value={`${stats.totalDistance} km`}
           icon={<Car className="h-4 w-4" />}
           description="Diesen Monat"
         />
         <StatCard
           title="Kraftstoffkosten"
-          value="€0,00"
+          value={`€${stats.totalFuelCost.toFixed(2)}`}
           icon={<Fuel className="h-4 w-4" />}
           description="Diesen Monat"
         />
         <StatCard
           title="Ø Verbrauch"
-          value="0 L/100km"
+          value={`${stats.avgConsumption} L/100km`}
           icon={<BarChart3 className="h-4 w-4" />}
           description="Letzte 30 Tage"
         />
@@ -115,15 +153,64 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Noch keine Fahrten</h3>
-              <p className="text-muted-foreground">
-                Starten Sie Ihre erste Fahrt über die Fahrtaufzeichnung
-              </p>
+          {recentTrips.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Noch keine Fahrten</h3>
+                <p className="text-muted-foreground mb-4">
+                  Starten Sie Ihre erste Fahrt über die Fahrtaufzeichnung
+                </p>
+                <Button onClick={handleNewTrip} className="bg-automotive-primary hover:bg-automotive-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Erste Fahrt erstellen
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {recentTrips.map((trip) => (
+                <li key={trip.id} className="py-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-foreground">{trip.driver_name}</span>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        trip.purpose === 'Geschäftlich' ? 'bg-blue-100 text-blue-800' :
+                        trip.purpose === 'Privat' ? 'bg-green-100 text-green-800' :
+                        'bg-orange-100 text-orange-800'
+                      }`}>
+                        {trip.purpose}
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {trip.start_location && trip.end_location ? (
+                        <span>{trip.start_location} → {trip.end_location}</span>
+                      ) : (
+                        <span>Fahrt vom {new Date(trip.start_time).toLocaleDateString('de-DE')}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(trip.start_time).toLocaleDateString('de-DE', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-foreground">
+                      {trip.distance_km ? `${trip.distance_km.toFixed(1)} km` : '-'}
+                    </div>
+                    {trip.is_active && (
+                      <span className="text-xs text-success">Aktiv</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 
