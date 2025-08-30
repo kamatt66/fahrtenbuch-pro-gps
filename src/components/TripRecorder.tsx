@@ -17,7 +17,6 @@ import {
   Car,
   Settings,
   Plus,
-  Database,
   Trash2
 } from 'lucide-react';
 import { useBluetooth } from '@/hooks/useBluetooth';
@@ -42,7 +41,6 @@ const TripRecorder = () => {
     startTrip,
     endTrip,
     createManualTrip,
-    createDemoTrips,
     deleteAllTrips
   } = useTrips();
 
@@ -134,11 +132,6 @@ const TripRecorder = () => {
       notes: ''
     });
     setIsManualTripDialogOpen(false);
-  };
-
-  const handleCreateDemoData = async () => {
-    await createDemoTrips();
-    toast.success('Demo-Fahrten erstellt!');
   };
 
   const handleDeleteAllTrips = async () => {
@@ -246,7 +239,7 @@ const TripRecorder = () => {
                   Fahrt starten (GPS)
                 </Button>
                 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
                   <Button
                     onClick={() => setIsManualTripDialogOpen(true)}
                     variant="outline"
@@ -257,24 +250,15 @@ const TripRecorder = () => {
                   </Button>
                   
                   <Button
-                    onClick={handleCreateDemoData}
-                    variant="outline"
+                    onClick={handleDeleteAllTrips}
+                    variant="destructive"
+                    size="sm"
                     className="w-full"
                   >
-                    <Database className="w-4 h-4 mr-2" />
-                    Demo-Daten
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Alle Fahrten löschen
                   </Button>
                 </div>
-                
-                <Button
-                  onClick={handleDeleteAllTrips}
-                  variant="destructive"
-                  size="sm"
-                  className="w-full"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Alle Fahrten löschen
-                </Button>
               </div>
             </>
           ) : (

@@ -257,77 +257,6 @@ export const useTrips = () => {
     }
   }, [loadTrips]);
 
-  // Create demo trips
-  const createDemoTrips = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
-      const demoTrips = [
-        {
-          driver_name: 'Max Mustermann',
-          start_location: 'München Hauptbahnhof',
-          end_location: 'Frankfurt Flughafen',
-          distance_km: 385.2,
-          purpose: 'Geschäftlich',
-          notes: 'Kundentermin bei Lufthansa',
-          start_time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          end_time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(),
-          is_active: false,
-          user_id: user.id
-        },
-        {
-          driver_name: 'Anna Schmidt',
-          start_location: 'Berlin Mitte',
-          end_location: 'Hamburg HafenCity',
-          distance_km: 289.7,
-          purpose: 'Geschäftlich',
-          notes: 'Projektmeeting',
-          start_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          end_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 3.5 * 60 * 60 * 1000).toISOString(),
-          is_active: false,
-          user_id: user.id
-        },
-        {
-          driver_name: 'Thomas Weber',
-          start_location: 'Köln Deutz',
-          end_location: 'Düsseldorf Flughafen',
-          distance_km: 42.1,
-          purpose: 'Arbeitsweg',
-          notes: 'Dienstreise nach London',
-          start_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          end_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString(),
-          is_active: false,
-          user_id: user.id
-        },
-        {
-          driver_name: 'Lisa Müller',
-          start_location: 'Stuttgart Zentrum',
-          end_location: 'Ulm Hauptbahnhof',
-          distance_km: 94.3,
-          purpose: 'Privat',
-          notes: 'Familienbesuch',
-          start_time: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-          end_time: new Date(Date.now() - 12 * 60 * 60 * 1000 + 1.5 * 60 * 60 * 1000).toISOString(),
-          is_active: false,
-          user_id: user.id
-        }
-      ];
-
-      const { error } = await supabase
-        .from('trips')
-        .insert(demoTrips);
-
-      if (error) throw error;
-
-      toast.success('Demo-Fahrten erstellt');
-      loadTrips();
-    } catch (error) {
-      console.error('Error creating demo trips:', error);
-      toast.error('Fehler beim Erstellen der Demo-Daten');
-    }
-  }, [loadTrips]);
-
   // Delete all trips
   const deleteAllTrips = useCallback(async () => {
     try {
@@ -400,7 +329,6 @@ export const useTrips = () => {
     updateTrip,
     deleteTrip,
     createManualTrip,
-    createDemoTrips,
     deleteAllTrips,
     loadTrips,
     getCurrentLocation
