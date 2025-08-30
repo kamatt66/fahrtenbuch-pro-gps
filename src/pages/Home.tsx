@@ -7,6 +7,7 @@ import TripRecorder from "@/components/TripRecorder";
 import TripList from "@/components/TripList";
 import CostManagement from "@/components/CostManagement";
 import FuelManagement from "@/components/FuelManagement";
+import SettingsManagement from "@/components/SettingsManagement";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -49,8 +50,7 @@ const Home = () => {
       case "settings":
         return (
           <div className="p-6">
-            <h1 className="text-3xl font-bold mb-4">Einstellungen</h1>
-            <p className="text-muted-foreground">Anwendungseinstellungen werden bald verfügbar sein...</p>
+            <SettingsManagement />
           </div>
         );
       default:

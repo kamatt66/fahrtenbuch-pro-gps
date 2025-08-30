@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Play, 
   Square, 
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useBluetooth } from '@/hooks/useBluetooth';
 import { useTrips } from '@/hooks/useTrips';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 
 const TripRecorder = () => {
@@ -38,33 +40,41 @@ const TripRecorder = () => {
     endTrip
   } = useTrips();
 
-  const [driverName, setDriverName] = useState('Max Mustermann');
+  const { settings } = useSettings();
+
+  const [driverName, setDriverName] = useState('');
   const [isBluetoothDialogOpen, setIsBluetoothDialogOpen] = useState(false);
   const [endTripNotes, setEndTripNotes] = useState('');
   const [isEndTripDialogOpen, setIsEndTripDialogOpen] = useState(false);
-  const [autoStart, setAutoStart] = useState(true);
 
-  // Auto-start trip when Bluetooth device connects
+  // Load default driver from settings
   useEffect(() => {
-    if (autoStart && connectedDevice && !isTracking) {
+    if (settings.defaultDriver && !driverName) {
+      setDriverName(settings.defaultDriver);
+    }
+  }, [settings.defaultDriver, driverName]);
+
+  // Auto-start trip when Bluetooth device connects (if enabled in settings)
+  useEffect(() => {
+    if (settings.autoStartTrips && connectedDevice && !isTracking) {
       const startAutoTrip = async () => {
-        await startTrip(driverName, connectedDevice.name, connectedDevice.id);
+        await startTrip(driverName || settings.defaultDriver, connectedDevice.name, connectedDevice.id);
         toast.success(`Automatische Fahrt gestartet (${connectedDevice.name})`);
       };
       startAutoTrip();
     }
-  }, [connectedDevice, isTracking, autoStart, driverName, startTrip]);
+  }, [connectedDevice, isTracking, settings.autoStartTrips, driverName, settings.defaultDriver, startTrip]);
 
-  // Auto-end trip when Bluetooth device disconnects
+  // Auto-end trip when Bluetooth device disconnects (if enabled in settings)
   useEffect(() => {
-    if (autoStart && !connectedDevice && isTracking && activeTrip?.bluetooth_device) {
+    if (settings.autoStopTrips && !connectedDevice && isTracking && activeTrip?.bluetooth_device) {
       const endAutoTrip = async () => {
         await endTrip('Automatisch beendet (Bluetooth getrennt)');
         toast.info('Fahrt automatisch beendet');
       };
       endAutoTrip();
     }
-  }, [connectedDevice, isTracking, activeTrip, autoStart, endTrip]);
+  }, [connectedDevice, isTracking, activeTrip, settings.autoStopTrips, endTrip]);
 
   const handleStartTrip = async () => {
     if (!driverName.trim()) {
@@ -135,10 +145,11 @@ const TripRecorder = () => {
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={autoStart}
-              onChange={(e) => setAutoStart(e.target.checked)}
+              checked={settings.autoStartTrips}
+              onChange={(e) => toast.info('Einstellung in den App-Einstellungen ändern')}
               id="autoStart"
               className="rounded"
+              disabled
             />
             <Label htmlFor="autoStart" className="text-sm">
               Automatisch starten/stoppen bei Bluetooth-Verbindung
