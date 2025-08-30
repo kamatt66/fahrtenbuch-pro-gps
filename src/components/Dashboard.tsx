@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, Users, MapPin, Fuel, BarChart3, Plus } from "lucide-react";
-
+import { useVehicles } from "@/hooks/useVehicles";
 interface DashboardProps {
   onTabChange?: (tab: string) => void;
 }
@@ -29,6 +29,8 @@ const StatCard = ({ title, value, icon, description, trend }: StatCardProps) => 
 );
 
 const Dashboard = ({ onTabChange }: DashboardProps) => {
+  const { vehicles, loading } = useVehicles();
+
   const handleNewTrip = () => {
     onTabChange?.('trips');
   };
@@ -134,15 +136,35 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <Car className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Noch keine Fahrzeuge</h3>
-              <p className="text-muted-foreground">
-                Fügen Sie Ihr erstes Fahrzeug über die Fahrzeugverwaltung hinzu
-              </p>
+          {loading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">Fahrzeuge werden geladen...</div>
+          ) : vehicles.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <Car className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Noch keine Fahrzeuge</h3>
+                <p className="text-muted-foreground">
+                  Fügen Sie Ihr erstes Fahrzeug über die Fahrzeugverwaltung hinzu
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {vehicles.slice(0, 5).map((v) => (
+                <li key={v.id} className="py-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">{v.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {v.brand ?? '-'} {v.model ?? ''} • {v.plate}
+                    </p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded bg-automotive-light text-foreground/80">
+                    {v.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
     </div>
