@@ -67,7 +67,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
     };
   }, [trips, fuelRecords]);
 
-  const recentTrips = trips.slice(0, 5);
+  const recentTrips = trips.slice(0, 4);
 
   const handleNewTrip = () => {
     onTabChange?.('trips');
