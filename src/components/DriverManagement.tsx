@@ -25,47 +25,7 @@ interface Driver {
 }
 
 const DriverManagement = () => {
-  const [drivers, setDrivers] = useState<Driver[]>([
-    {
-      id: "1",
-      firstName: "Max",
-      lastName: "Mustermann",
-      email: "max.mustermann@firma.de",
-      phone: "+49 30 12345678",
-      licenseNumber: "D123456789",
-      licenseExpiry: "2028-12-31",
-      status: 'active',
-      totalTrips: 156,
-      totalKm: 12450,
-      monthlyKm: 1247
-    },
-    {
-      id: "2",
-      firstName: "Anna",
-      lastName: "Schmidt",
-      email: "anna.schmidt@firma.de", 
-      phone: "+49 40 98765432",
-      licenseNumber: "D987654321",
-      licenseExpiry: "2026-08-15",
-      status: 'active',
-      totalTrips: 89,
-      totalKm: 8760,
-      monthlyKm: 890
-    },
-    {
-      id: "3",
-      firstName: "Thomas",
-      lastName: "Weber",
-      email: "thomas.weber@firma.de",
-      phone: "+49 89 11111111",
-      licenseNumber: "D456789123",
-      licenseExpiry: "2025-03-20",
-      status: 'suspended',
-      totalTrips: 45,
-      totalKm: 3450,
-      monthlyKm: 0
-    }
-  ]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDriver, setNewDriver] = useState({

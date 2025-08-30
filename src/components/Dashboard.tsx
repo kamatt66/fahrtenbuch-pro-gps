@@ -80,31 +80,27 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Gesamte Fahrten"
-          value="156"
+          value="0"
           icon={<MapPin className="h-4 w-4" />}
           description="Diesen Monat"
-          trend="+12% zum Vormonat"
         />
         <StatCard
           title="Gefahrene Kilometer"
-          value="2.847 km"
+          value="0 km"
           icon={<Car className="h-4 w-4" />}
           description="Diesen Monat"
-          trend="+8% zum Vormonat"
         />
         <StatCard
           title="Kraftstoffkosten"
-          value="€347,50"
+          value="€0,00"
           icon={<Fuel className="h-4 w-4" />}
           description="Diesen Monat"
-          trend="-3% zum Vormonat"
         />
         <StatCard
           title="Ø Verbrauch"
-          value="6,8 L/100km"
+          value="0 L/100km"
           icon={<BarChart3 className="h-4 w-4" />}
           description="Letzte 30 Tage"
-          trend="-0,2L zum Vormonat"
         />
       </div>
 
@@ -117,29 +113,14 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { from: "Berlin", to: "Hamburg", date: "Heute, 14:30", km: "289 km", purpose: "Geschäftlich" },
-              { from: "Hamburg", to: "München", date: "Gestern, 09:15", km: "612 km", purpose: "Geschäftlich" },
-              { from: "München", to: "Berlin", date: "27.12.2024", km: "584 km", purpose: "Privat" },
-            ].map((trip, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                <div className="flex-1">
-                  <div className="font-medium">{trip.from} → {trip.to}</div>
-                  <div className="text-sm text-muted-foreground">{trip.date}</div>
-                </div>
-                <div className="flex items-center space-x-4 text-sm">
-                  <span className="font-medium">{trip.km}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    trip.purpose === 'Geschäftlich' 
-                      ? 'bg-automotive-accent/20 text-automotive-accent' 
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {trip.purpose}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">Noch keine Fahrten</h3>
+              <p className="text-muted-foreground">
+                Starten Sie Ihre erste Fahrt über die Fahrtaufzeichnung
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -153,32 +134,14 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { name: "BMW 320d", plate: "B-MW 1234", fuel: "Diesel", consumption: "5,8 L/100km", km: "1.247 km" },
-              { name: "VW Golf", plate: "HH-VW 567", fuel: "Benzin", consumption: "7,2 L/100km", km: "1.600 km" },
-            ].map((vehicle, index) => (
-              <div key={index} className="p-4 rounded-lg border border-border bg-card hover:shadow-card transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium">{vehicle.name}</h3>
-                  <span className="text-sm text-muted-foreground">{vehicle.plate}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Kraftstoff:</span>
-                    <div className="font-medium">{vehicle.fuel}</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Verbrauch:</span>
-                    <div className="font-medium">{vehicle.consumption}</div>
-                  </div>
-                </div>
-                <div className="mt-2 pt-2 border-t border-border">
-                  <span className="text-sm text-muted-foreground">Diesen Monat: </span>
-                  <span className="font-medium">{vehicle.km}</span>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <Car className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">Noch keine Fahrzeuge</h3>
+              <p className="text-muted-foreground">
+                Fügen Sie Ihr erstes Fahrzeug über die Fahrzeugverwaltung hinzu
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -24,47 +24,7 @@ interface Vehicle {
 }
 
 const VehicleManagement = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([
-    {
-      id: "1",
-      name: "BMW 320d",
-      brand: "BMW",
-      model: "320d",
-      plate: "B-MW 1234",
-      fuel: "Diesel",
-      year: 2022,
-      consumption: 5.8,
-      status: 'active',
-      totalKm: 45230,
-      monthlyKm: 1247
-    },
-    {
-      id: "2", 
-      name: "VW Golf",
-      brand: "Volkswagen",
-      model: "Golf 8",
-      plate: "HH-VW 567",
-      fuel: "Benzin",
-      year: 2021,
-      consumption: 7.2,
-      status: 'active',
-      totalKm: 32150,
-      monthlyKm: 1600
-    },
-    {
-      id: "3",
-      name: "Mercedes Sprinter",
-      brand: "Mercedes-Benz", 
-      model: "Sprinter",
-      plate: "M-MB 890",
-      fuel: "Diesel",
-      year: 2020,
-      consumption: 9.5,
-      status: 'maintenance',
-      totalKm: 87450,
-      monthlyKm: 0
-    }
-  ]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
