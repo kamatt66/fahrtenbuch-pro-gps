@@ -35,7 +35,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden bg-gradient-primary p-4 text-primary-foreground shadow-elegant">
+      <div className="lg:hidden bg-gradient-primary p-4 pt-12 text-primary-foreground shadow-elegant">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Fahrtenbuch</h1>
           <Button
