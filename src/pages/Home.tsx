@@ -13,7 +13,7 @@ const Home = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard onTabChange={setActiveTab} />;
       case "vehicles":
         return <VehicleManagement />;
       case "drivers":

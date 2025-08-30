@@ -2,6 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, Users, MapPin, Fuel, BarChart3, Plus } from "lucide-react";
 
+interface DashboardProps {
+  onTabChange?: (tab: string) => void;
+}
+
 interface StatCardProps {
   title: string;
   value: string;
@@ -24,7 +28,19 @@ const StatCard = ({ title, value, icon, description, trend }: StatCardProps) => 
   </Card>
 );
 
-const Dashboard = () => {
+const Dashboard = ({ onTabChange }: DashboardProps) => {
+  const handleNewTrip = () => {
+    onTabChange?.('trips');
+  };
+
+  const handleFuelRecord = () => {
+    onTabChange?.('costs');
+  };
+
+  const handleShowRoute = () => {
+    onTabChange?.('trips');
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -35,15 +51,26 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
-        <Button className="bg-gradient-accent text-accent-foreground hover:opacity-90 transition-all">
+        <Button 
+          className="bg-gradient-accent text-accent-foreground hover:opacity-90 transition-all"
+          onClick={handleNewTrip}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Neue Fahrt
         </Button>
-        <Button variant="outline" className="border-automotive-light hover:bg-automotive-light transition-colors">
+        <Button 
+          variant="outline" 
+          className="border-automotive-light hover:bg-automotive-light transition-colors"
+          onClick={handleFuelRecord}
+        >
           <Fuel className="w-4 h-4 mr-2" />
           Tanken erfassen
         </Button>
-        <Button variant="outline" className="border-automotive-light hover:bg-automotive-light transition-colors">
+        <Button 
+          variant="outline" 
+          className="border-automotive-light hover:bg-automotive-light transition-colors"
+          onClick={handleShowRoute}
+        >
           <MapPin className="w-4 h-4 mr-2" />
           Route anzeigen
         </Button>
