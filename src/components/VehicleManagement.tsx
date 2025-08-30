@@ -19,6 +19,7 @@ interface Vehicle {
   year: number;
   consumption: number;
   status: 'active' | 'maintenance' | 'inactive';
+  initialKm: number;
   totalKm: number;
   monthlyKm: number;
 }
@@ -34,7 +35,8 @@ const VehicleManagement = () => {
     plate: "",
     fuel: "",
     year: new Date().getFullYear(),
-    consumption: 0
+    consumption: 0,
+    initialKm: 0
   });
 
   const handleAddVehicle = () => {
@@ -47,7 +49,7 @@ const VehicleManagement = () => {
       id: Date.now().toString(),
       ...newVehicle,
       status: 'active',
-      totalKm: 0,
+      totalKm: newVehicle.initialKm,
       monthlyKm: 0
     };
 
@@ -59,7 +61,8 @@ const VehicleManagement = () => {
       plate: "",
       fuel: "",
       year: new Date().getFullYear(),
-      consumption: 0
+      consumption: 0,
+      initialKm: 0
     });
     setIsAddDialogOpen(false);
     toast.success("Fahrzeug erfolgreich hinzugefügt");
@@ -162,16 +165,28 @@ const VehicleManagement = () => {
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="consumption">Verbrauch (L/100km)</Label>
-                <Input
-                  id="consumption"
-                  type="number"
-                  step="0.1"
-                  value={newVehicle.consumption}
-                  onChange={(e) => setNewVehicle({...newVehicle, consumption: parseFloat(e.target.value)})}
-                  placeholder="6.5"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="consumption">Verbrauch (L/100km)</Label>
+                  <Input
+                    id="consumption"
+                    type="number"
+                    step="0.1"
+                    value={newVehicle.consumption}
+                    onChange={(e) => setNewVehicle({...newVehicle, consumption: parseFloat(e.target.value)})}
+                    placeholder="6.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="initialKm">Anfangskilometer*</Label>
+                  <Input
+                    id="initialKm"
+                    type="number"
+                    value={newVehicle.initialKm}
+                    onChange={(e) => setNewVehicle({...newVehicle, initialKm: parseInt(e.target.value) || 0})}
+                    placeholder="12500"
+                  />
+                </div>
               </div>
               <Button onClick={handleAddVehicle} className="w-full">
                 Fahrzeug hinzufügen
