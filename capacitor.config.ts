@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.474abdc9e562444288dfd584900179e2',
+  appId: 'app.lovable.fahrtenbuchpro',
   appName: 'fahrtenbuch-pro-gps',
   webDir: 'dist',
   server: {
