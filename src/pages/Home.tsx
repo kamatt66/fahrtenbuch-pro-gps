@@ -59,7 +59,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="lg:ml-64">
         {/* User info and logout */}
@@ -77,7 +77,9 @@ const Home = () => {
             Abmelden
           </Button>
         </div>
-        {renderContent()}
+        <div className="pb-4 lg:pb-0">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
