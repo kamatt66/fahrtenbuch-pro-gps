@@ -140,73 +140,73 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-automotive-primary/10 via-background to-automotive-secondary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-automotive-primary/10 via-background to-automotive-secondary/10 flex items-center justify-center p-2 sm:p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-automotive-primary rounded-full mb-4">
-            <Car className="w-8 h-8 text-white" />
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-automotive-primary rounded-full mb-2 sm:mb-4">
+            <Car className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Fahrtenbuch</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Fahrtenbuch</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Verwalten Sie Ihre Fahrten und Fahrzeuge digital
           </p>
         </div>
 
         <Card className="shadow-elegant border-0 bg-card/80 backdrop-blur">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Willkommen</CardTitle>
-            <CardDescription className="text-center">
+          <CardHeader className="space-y-1 pb-4 sm:pb-6">
+            <CardTitle className="text-xl sm:text-2xl text-center">Willkommen</CardTitle>
+            <CardDescription className="text-center text-sm sm:text-base">
               Melden Sie sich an oder erstellen Sie ein neues Konto
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login" className="flex items-center gap-2">
-                  <LogIn className="w-4 h-4" />
+              <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+                <TabsTrigger value="login" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                  <LogIn className="w-3 h-3 sm:w-4 sm:h-4" />
                   Anmelden
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="flex items-center gap-2">
-                  <UserPlus className="w-4 h-4" />
+                <TabsTrigger value="signup" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
                   Registrieren
                 </TabsTrigger>
               </TabsList>
 
               {error && (
-                <Alert className="mb-6 border-destructive/50 bg-destructive/10">
-                  <AlertDescription className="text-destructive">
+                <Alert className="mb-4 sm:mb-6 border-destructive/50 bg-destructive/10">
+                  <AlertDescription className="text-destructive text-sm">
                     {error}
                   </AlertDescription>
                 </Alert>
               )}
 
               <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">E-Mail</Label>
+                <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="login-email" className="text-sm">E-Mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="login-email"
                         type="email"
                         placeholder="ihre.email@beispiel.de"
-                        className="pl-10"
+                        className="pl-10 text-sm"
                         value={loginForm.email}
                         onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
                         required
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Passwort</Label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="login-password" className="text-sm">Passwort</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="login-password"
                         type="password"
                         placeholder="••••••••"
-                        className="pl-10"
+                        className="pl-10 text-sm"
                         value={loginForm.password}
                         onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                         required
@@ -215,7 +215,7 @@ const Auth = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-automotive-primary hover:bg-automotive-primary/90" 
+                    className="w-full bg-automotive-primary hover:bg-automotive-primary/90 text-sm sm:text-base" 
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Wird angemeldet...' : 'Anmelden'}
@@ -236,31 +236,31 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-Mail</Label>
+                <form onSubmit={handleSignup} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm">E-Mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signup-email"
                         type="email"
                         placeholder="ihre.email@beispiel.de"
-                        className="pl-10"
+                        className="pl-10 text-sm"
                         value={signupForm.email}
                         onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
                         required
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Passwort</Label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm">Passwort</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="signup-password"
                         type="password"
                         placeholder="••••••••"
-                        className="pl-10"
+                        className="pl-10 text-sm"
                         value={signupForm.password}
                         onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
                         required
@@ -268,15 +268,15 @@ const Auth = () => {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Passwort bestätigen</Label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="confirm-password" className="text-sm">Passwort bestätigen</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="confirm-password"
                         type="password"
                         placeholder="••••••••"
-                        className="pl-10"
+                        className="pl-10 text-sm"
                         value={signupForm.confirmPassword}
                         onChange={(e) => setSignupForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                         required
@@ -286,7 +286,7 @@ const Auth = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-automotive-accent hover:bg-automotive-accent/90" 
+                    className="w-full bg-automotive-accent hover:bg-automotive-accent/90 text-sm sm:text-base" 
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Wird registriert...' : 'Registrieren'}
@@ -297,7 +297,7 @@ const Auth = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6 text-sm text-muted-foreground">
+        <div className="text-center mt-3 sm:mt-6 text-xs sm:text-sm text-muted-foreground px-2">
           <p>© 2024 Fahrtenbuch - Digitale Fahrzeugverwaltung</p>
         </div>
       </div>
