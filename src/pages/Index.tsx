@@ -3,24 +3,9 @@ import Navigation from "@/components/Navigation";
 import Dashboard from "@/components/Dashboard";
 import VehicleManagement from "@/components/VehicleManagement";
 import DriverManagement from "@/components/DriverManagement";
-import Auth from "@/components/Auth";
-import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Wird geladen...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
 
   const renderContent = () => {
     switch (activeTab) {
