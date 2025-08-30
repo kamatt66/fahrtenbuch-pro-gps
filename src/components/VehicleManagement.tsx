@@ -7,25 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Car, Plus, Edit, Trash2, Fuel, Calendar, Wrench } from "lucide-react";
+import { useVehicles, type Vehicle } from "@/hooks/useVehicles";
 import { toast } from "sonner";
 
-interface Vehicle {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  plate: string;
-  fuel: string;
-  year: number;
-  consumption: number;
-  status: 'active' | 'maintenance' | 'inactive';
-  initialKm: number;
-  totalKm: number;
-  monthlyKm: number;
-}
-
 const VehicleManagement = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const { vehicles, loading, addVehicle, deleteVehicle } = useVehicles();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
@@ -39,33 +25,35 @@ const VehicleManagement = () => {
     initialKm: 0
   });
 
-  const handleAddVehicle = () => {
+  const handleAddVehicle = async () => {
     if (!newVehicle.name || !newVehicle.plate) {
       toast.error("Bitte füllen Sie alle Pflichtfelder aus");
       return;
     }
 
-    const vehicle: Vehicle = {
-      id: Date.now().toString(),
+    const vehicleData = {
       ...newVehicle,
-      status: 'active',
-      totalKm: newVehicle.initialKm,
-      monthlyKm: 0
+      status: 'active' as const,
+      initial_km: newVehicle.initialKm,
+      total_km: newVehicle.initialKm,
+      monthly_km: 0
     };
 
-    setVehicles([...vehicles, vehicle]);
-    setNewVehicle({
-      name: "",
-      brand: "",
-      model: "",
-      plate: "",
-      fuel: "",
-      year: new Date().getFullYear(),
-      consumption: 0,
-      initialKm: 0
-    });
-    setIsAddDialogOpen(false);
-    toast.success("Fahrzeug erfolgreich hinzugefügt");
+    const result = await addVehicle(vehicleData);
+    
+    if (result) {
+      setNewVehicle({
+        name: "",
+        brand: "",
+        model: "",
+        plate: "",
+        fuel: "",
+        year: new Date().getFullYear(),
+        consumption: 0,
+        initialKm: 0
+      });
+      setIsAddDialogOpen(false);
+    }
   };
 
   const getStatusBadge = (status: Vehicle['status']) => {
@@ -218,7 +206,7 @@ const VehicleManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {vehicles.reduce((sum, v) => sum + v.totalKm, 0).toLocaleString()}
+              {vehicles.reduce((sum, v) => sum + v.total_km, 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Alle Fahrzeuge</p>
           </CardContent>
@@ -244,7 +232,7 @@ const VehicleManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(vehicles.reduce((sum, v) => sum + v.consumption, 0) / vehicles.length).toFixed(1)}L
+              {vehicles.length > 0 ? (vehicles.reduce((sum, v) => sum + v.consumption, 0) / vehicles.length).toFixed(1) : '0.0'}L
             </div>
             <p className="text-xs text-muted-foreground">Pro 100km</p>
           </CardContent>
@@ -292,11 +280,11 @@ const VehicleManagement = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Gesamt-KM:</span>
-                  <span className="font-medium">{vehicle.totalKm.toLocaleString()} km</span>
+                  <span className="font-medium">{vehicle.total_km.toLocaleString()} km</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Diesen Monat:</span>
-                  <span className="font-medium">{vehicle.monthlyKm.toLocaleString()} km</span>
+                  <span className="font-medium">{vehicle.monthly_km.toLocaleString()} km</span>
                 </div>
               </div>
 
@@ -305,7 +293,12 @@ const VehicleManagement = () => {
                   <Edit className="w-4 h-4 mr-2" />
                   Bearbeiten
                 </Button>
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => deleteVehicle(vehicle.id)}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
