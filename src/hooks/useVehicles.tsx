@@ -51,6 +51,7 @@ export const useVehicles = () => {
 
   const addVehicle = async (vehicle: Omit<Vehicle, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Attempting to add vehicle:', vehicle);
       const { data, error } = await supabase
         .from('vehicles')
         .insert([{
@@ -60,9 +61,11 @@ export const useVehicles = () => {
         .select()
         .single();
 
+      console.log('Supabase response:', { data, error });
+
       if (error) {
         console.error('Error adding vehicle:', error);
-        toast.error('Fehler beim Hinzufügen des Fahrzeugs');
+        toast.error('Fehler beim Hinzufügen des Fahrzeugs: ' + error.message);
         return null;
       }
 
