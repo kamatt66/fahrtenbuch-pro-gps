@@ -62,6 +62,7 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				automotive: {
+					primary: 'hsl(var(--automotive-blue))',
 					blue: 'hsl(var(--automotive-blue))',
 					light: 'hsl(var(--automotive-light))',
 					accent: 'hsl(var(--automotive-accent))'
