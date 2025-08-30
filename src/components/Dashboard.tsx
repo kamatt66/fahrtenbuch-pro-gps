@@ -34,7 +34,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
   };
 
   const handleFuelRecord = () => {
-    onTabChange?.('costs');
+    onTabChange?.('fuel');
   };
 
   const handleShowRoute = () => {
