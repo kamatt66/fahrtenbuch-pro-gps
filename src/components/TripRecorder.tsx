@@ -17,7 +17,8 @@ import {
   Car,
   Settings,
   Plus,
-  Database
+  Database,
+  Trash2
 } from 'lucide-react';
 import { useBluetooth } from '@/hooks/useBluetooth';
 import { useTrips } from '@/hooks/useTrips';
@@ -41,7 +42,8 @@ const TripRecorder = () => {
     startTrip,
     endTrip,
     createManualTrip,
-    createDemoTrips
+    createDemoTrips,
+    deleteAllTrips
   } = useTrips();
 
   const { settings } = useSettings();
@@ -137,6 +139,12 @@ const TripRecorder = () => {
   const handleCreateDemoData = async () => {
     await createDemoTrips();
     toast.success('Demo-Fahrten erstellt!');
+  };
+
+  const handleDeleteAllTrips = async () => {
+    if (window.confirm('Sind Sie sicher, dass Sie alle Fahrten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+      await deleteAllTrips();
+    }
   };
 
   const formatDuration = (startTime: string) => {
@@ -257,6 +265,16 @@ const TripRecorder = () => {
                     Demo-Daten
                   </Button>
                 </div>
+                
+                <Button
+                  onClick={handleDeleteAllTrips}
+                  variant="destructive"
+                  size="sm"
+                  className="w-full"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Alle Fahrten löschen
+                </Button>
               </div>
             </>
           ) : (

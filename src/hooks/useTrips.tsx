@@ -328,6 +328,27 @@ export const useTrips = () => {
     }
   }, [loadTrips]);
 
+  // Delete all trips
+  const deleteAllTrips = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
+      const { error } = await supabase
+        .from('trips')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Alle Fahrten gelöscht');
+      loadTrips();
+    } catch (error) {
+      console.error('Error deleting trips:', error);
+      toast.error('Fehler beim Löschen der Fahrten');
+    }
+  }, [loadTrips]);
+
   useEffect(() => {
     loadTrips();
   }, [loadTrips]);
@@ -380,6 +401,7 @@ export const useTrips = () => {
     deleteTrip,
     createManualTrip,
     createDemoTrips,
+    deleteAllTrips,
     loadTrips,
     getCurrentLocation
   };
