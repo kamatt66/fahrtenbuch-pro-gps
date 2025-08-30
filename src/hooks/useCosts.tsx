@@ -68,11 +68,15 @@ export const useCosts = () => {
   // Add new cost
   const addCost = useCallback(async (costData: Omit<Cost, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
       const { data, error } = await supabase
         .from('costs')
         .insert({
           ...costData,
-          amount: Number(costData.amount)
+          amount: Number(costData.amount),
+          user_id: user.id
         })
         .select()
         .single();

@@ -8,61 +8,43 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Plus, Edit, Trash2, Phone, Mail, Calendar, MapPin } from "lucide-react";
 import { toast } from "sonner";
-
-interface Driver {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  licenseNumber: string;
-  licenseExpiry: string;
-  status: 'active' | 'inactive' | 'suspended';
-  totalTrips: number;
-  totalKm: number;
-  monthlyKm: number;
-  avatar?: string;
-}
+import { useDrivers, type Driver } from "@/hooks/useDrivers";
 
 const DriverManagement = () => {
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-
+  const { drivers, loading, addDriver, deleteDriver } = useDrivers();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
   const [newDriver, setNewDriver] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
-    licenseNumber: "",
-    licenseExpiry: ""
+    license_number: "",
+    license_expiry: "",
+    status: 'active' as const
   });
 
-  const handleAddDriver = () => {
-    if (!newDriver.firstName || !newDriver.lastName || !newDriver.email) {
+  const handleAddDriver = async () => {
+    if (!newDriver.first_name || !newDriver.last_name || !newDriver.email) {
       toast.error("Bitte füllen Sie alle Pflichtfelder aus");
       return;
     }
 
-    const driver: Driver = {
-      id: Date.now().toString(),
-      ...newDriver,
-      status: 'active',
-      totalTrips: 0,
-      totalKm: 0,
-      monthlyKm: 0
-    };
-
-    setDrivers([...drivers, driver]);
-    setNewDriver({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      licenseNumber: "",
-      licenseExpiry: ""
-    });
-    setIsAddDialogOpen(false);
-    toast.success("Fahrer erfolgreich hinzugefügt");
+    try {
+      await addDriver(newDriver);
+      setNewDriver({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        license_number: "",
+        license_expiry: "",
+        status: 'active' as const
+      });
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   };
 
   const getStatusBadge = (status: Driver['status']) => {
@@ -82,7 +64,8 @@ const DriverManagement = () => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const isLicenseExpiringSoon = (expiryDate: string) => {
+  const isLicenseExpiringSoon = (expiryDate?: string) => {
+    if (!expiryDate) return false;
     const expiry = new Date(expiryDate);
     const now = new Date();
     const sixMonthsFromNow = new Date(now.getTime() + (6 * 30 * 24 * 60 * 60 * 1000));
@@ -115,8 +98,8 @@ const DriverManagement = () => {
                   <Label htmlFor="firstName">Vorname*</Label>
                   <Input
                     id="firstName"
-                    value={newDriver.firstName}
-                    onChange={(e) => setNewDriver({...newDriver, firstName: e.target.value})}
+                    value={newDriver.first_name}
+                    onChange={(e) => setNewDriver({...newDriver, first_name: e.target.value})}
                     placeholder="Max"
                   />
                 </div>
@@ -124,8 +107,8 @@ const DriverManagement = () => {
                   <Label htmlFor="lastName">Nachname*</Label>
                   <Input
                     id="lastName"
-                    value={newDriver.lastName}
-                    onChange={(e) => setNewDriver({...newDriver, lastName: e.target.value})}
+                    value={newDriver.last_name}
+                    onChange={(e) => setNewDriver({...newDriver, last_name: e.target.value})}
                     placeholder="Mustermann"
                   />
                 </div>
@@ -153,8 +136,8 @@ const DriverManagement = () => {
                 <Label htmlFor="licenseNumber">Führerscheinnummer</Label>
                 <Input
                   id="licenseNumber"
-                  value={newDriver.licenseNumber}
-                  onChange={(e) => setNewDriver({...newDriver, licenseNumber: e.target.value.toUpperCase()})}
+                  value={newDriver.license_number}
+                  onChange={(e) => setNewDriver({...newDriver, license_number: e.target.value.toUpperCase()})}
                   placeholder="D123456789"
                 />
               </div>
@@ -163,8 +146,8 @@ const DriverManagement = () => {
                 <Input
                   id="licenseExpiry"
                   type="date"
-                  value={newDriver.licenseExpiry}
-                  onChange={(e) => setNewDriver({...newDriver, licenseExpiry: e.target.value})}
+                  value={newDriver.license_expiry}
+                  onChange={(e) => setNewDriver({...newDriver, license_expiry: e.target.value})}
                 />
               </div>
               <Button onClick={handleAddDriver} className="w-full">
@@ -197,7 +180,7 @@ const DriverManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {drivers.reduce((sum, d) => sum + d.totalTrips, 0)}
+              {drivers.reduce((sum, d) => sum + d.total_trips, 0)}
             </div>
             <p className="text-xs text-muted-foreground">Alle Fahrer</p>
           </CardContent>
@@ -210,7 +193,7 @@ const DriverManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">
-              {drivers.filter(d => isLicenseExpiringSoon(d.licenseExpiry)).length}
+              {drivers.filter(d => isLicenseExpiringSoon(d.license_expiry)).length}
             </div>
             <p className="text-xs text-muted-foreground">In 6 Monaten</p>
           </CardContent>
@@ -223,7 +206,7 @@ const DriverManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Math.round(drivers.reduce((sum, d) => sum + d.totalKm, 0) / drivers.length).toLocaleString()}
+              {drivers.length > 0 ? Math.round(drivers.reduce((sum, d) => sum + d.total_km, 0) / drivers.length).toLocaleString() : '0'}
             </div>
             <p className="text-xs text-muted-foreground">Kilometer</p>
           </CardContent>
@@ -237,15 +220,15 @@ const DriverManagement = () => {
             <CardHeader>
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={driver.avatar} alt={`${driver.firstName} ${driver.lastName}`} />
+                  <AvatarImage src={driver.avatar_url} alt={`${driver.first_name} ${driver.last_name}`} />
                   <AvatarFallback className="bg-primary/20 text-primary font-medium">
-                    {getInitials(driver.firstName, driver.lastName)}
+                    {getInitials(driver.first_name, driver.last_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">{driver.firstName} {driver.lastName}</CardTitle>
+                  <CardTitle className="text-lg">{driver.first_name} {driver.last_name}</CardTitle>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{driver.licenseNumber}</span>
+                    <span className="text-sm text-muted-foreground">{driver.license_number}</span>
                     {getStatusBadge(driver.status)}
                   </div>
                 </div>
@@ -265,11 +248,11 @@ const DriverManagement = () => {
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className={`${isLicenseExpiringSoon(driver.licenseExpiry) ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
-                    Gültig bis: {new Date(driver.licenseExpiry).toLocaleDateString('de-DE')}
+                  <span className={`${isLicenseExpiringSoon(driver.license_expiry) ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
+                    Gültig bis: {driver.license_expiry ? new Date(driver.license_expiry).toLocaleDateString('de-DE') : 'N/A'}
                   </span>
                 </div>
-                {isLicenseExpiringSoon(driver.licenseExpiry) && (
+                {isLicenseExpiringSoon(driver.license_expiry) && (
                   <div className="text-xs text-warning font-medium bg-warning/10 p-2 rounded">
                     ⚠️ Führerschein läuft bald ab!
                   </div>
@@ -279,15 +262,15 @@ const DriverManagement = () => {
               <div className="pt-4 border-t border-border space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Fahrten gesamt:</span>
-                  <span className="font-medium">{driver.totalTrips}</span>
+                  <span className="font-medium">{driver.total_trips}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Gesamt-KM:</span>
-                  <span className="font-medium">{driver.totalKm.toLocaleString()} km</span>
+                  <span className="font-medium">{driver.total_km.toLocaleString()} km</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Diesen Monat:</span>
-                  <span className="font-medium">{driver.monthlyKm.toLocaleString()} km</span>
+                  <span className="font-medium">{driver.monthly_km.toLocaleString()} km</span>
                 </div>
               </div>
 

@@ -57,6 +57,9 @@ export const useFuelRecords = () => {
   // Add new fuel record
   const addFuelRecord = useCallback(async (recordData: Omit<FuelRecord, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
       const { data, error } = await supabase
         .from('fuel_records')
         .insert({
@@ -64,7 +67,8 @@ export const useFuelRecords = () => {
           fuel_amount: Number(recordData.fuel_amount),
           price_per_liter: Number(recordData.price_per_liter),
           total_amount: Number(recordData.total_amount),
-          odometer_reading: recordData.odometer_reading ? Number(recordData.odometer_reading) : null
+          odometer_reading: recordData.odometer_reading ? Number(recordData.odometer_reading) : null,
+          user_id: user.id
         })
         .select()
         .single();

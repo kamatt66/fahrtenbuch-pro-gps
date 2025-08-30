@@ -86,6 +86,9 @@ export const useTrips = () => {
     vehicleId?: string
   ) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
       const location = await getCurrentLocation();
       if (!location) {
         throw new Error('Standort erforderlich');
@@ -100,7 +103,8 @@ export const useTrips = () => {
           bluetooth_device: bluetoothDevice,
           vehicle_id: vehicleId,
           is_active: true,
-          purpose: 'Geschäftlich'
+          purpose: 'Geschäftlich',
+          user_id: user.id
         })
         .select()
         .single();

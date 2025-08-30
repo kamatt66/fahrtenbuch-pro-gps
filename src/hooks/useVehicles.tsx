@@ -17,7 +17,7 @@ export interface Vehicle {
   monthly_km: number;
   created_at?: string;
   updated_at?: string;
-  user_id?: string;
+  user_id: string;
 }
 
 export const useVehicles = () => {
@@ -49,14 +49,18 @@ export const useVehicles = () => {
     }
   };
 
-  const addVehicle = async (vehicle: Omit<Vehicle, 'id' | 'created_at' | 'updated_at'>) => {
+  const addVehicle = async (vehicle: Omit<Vehicle, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
       console.log('Attempting to add vehicle:', vehicle);
       const { data, error } = await supabase
         .from('vehicles')
         .insert([{
           ...vehicle,
-          total_km: vehicle.initial_km
+          total_km: vehicle.initial_km,
+          user_id: user.id
         }])
         .select()
         .single();
