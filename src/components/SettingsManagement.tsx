@@ -443,7 +443,7 @@ const SettingsManagement = () => {
             <h3 className="text-lg font-semibold">Fahrtenbuch Pro GPS</h3>
             <p className="text-sm text-muted-foreground">Version 1.0.0</p>
             <p className="text-xs text-muted-foreground">
-              Entwickelt mit React, TypeScript & Supabase
+              Entwickelt mit React, 2025 Karsten Matthies
             </p>
           </div>
         </CardContent>
