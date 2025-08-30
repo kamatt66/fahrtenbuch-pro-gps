@@ -15,7 +15,9 @@ import {
   MapPin, 
   Clock, 
   Car,
-  Settings
+  Settings,
+  Plus,
+  Database
 } from 'lucide-react';
 import { useBluetooth } from '@/hooks/useBluetooth';
 import { useTrips } from '@/hooks/useTrips';
@@ -37,7 +39,9 @@ const TripRecorder = () => {
     isTracking,
     currentLocation,
     startTrip,
-    endTrip
+    endTrip,
+    createManualTrip,
+    createDemoTrips
   } = useTrips();
 
   const { settings } = useSettings();
@@ -46,6 +50,15 @@ const TripRecorder = () => {
   const [isBluetoothDialogOpen, setIsBluetoothDialogOpen] = useState(false);
   const [endTripNotes, setEndTripNotes] = useState('');
   const [isEndTripDialogOpen, setIsEndTripDialogOpen] = useState(false);
+  const [isManualTripDialogOpen, setIsManualTripDialogOpen] = useState(false);
+  const [manualTrip, setManualTrip] = useState({
+    driver: '',
+    startLocation: '',
+    endLocation: '',
+    distance: '',
+    purpose: 'Geschäftlich',
+    notes: ''
+  });
 
   // Load default driver from settings
   useEffect(() => {
@@ -93,6 +106,37 @@ const TripRecorder = () => {
     await endTrip(endTripNotes);
     setEndTripNotes('');
     setIsEndTripDialogOpen(false);
+  };
+
+  const handleManualTrip = async () => {
+    if (!manualTrip.driver.trim() || !manualTrip.startLocation.trim() || !manualTrip.endLocation.trim() || !manualTrip.distance.trim()) {
+      toast.error('Bitte füllen Sie alle Pflichtfelder aus');
+      return;
+    }
+
+    await createManualTrip({
+      driverName: manualTrip.driver,
+      startLocation: manualTrip.startLocation,
+      endLocation: manualTrip.endLocation,
+      distance: parseFloat(manualTrip.distance),
+      purpose: manualTrip.purpose,
+      notes: manualTrip.notes || null
+    });
+
+    setManualTrip({
+      driver: '',
+      startLocation: '',
+      endLocation: '',
+      distance: '',
+      purpose: 'Geschäftlich',
+      notes: ''
+    });
+    setIsManualTripDialogOpen(false);
+  };
+
+  const handleCreateDemoData = async () => {
+    await createDemoTrips();
+    toast.success('Demo-Fahrten erstellt!');
   };
 
   const formatDuration = (startTime: string) => {
@@ -184,14 +228,36 @@ const TripRecorder = () => {
                 />
               </div>
               
-              <Button
-                onClick={handleStartTrip}
-                className="w-full bg-success hover:bg-success/90 text-success-foreground"
-                disabled={!driverName.trim()}
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Fahrt starten
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={handleStartTrip}
+                  className="w-full bg-success hover:bg-success/90 text-success-foreground"
+                  disabled={!driverName.trim()}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Fahrt starten (GPS)
+                </Button>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={() => setIsManualTripDialogOpen(true)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Manuelle Fahrt
+                  </Button>
+                  
+                  <Button
+                    onClick={handleCreateDemoData}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Demo-Daten
+                  </Button>
+                </div>
+              </div>
             </>
           ) : (
             <div className="space-y-4">
@@ -314,6 +380,92 @@ const TripRecorder = () => {
               </Button>
               <Button onClick={handleEndTrip} variant="destructive" className="flex-1">
                 Fahrt beenden
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Trip Dialog */}
+      <Dialog open={isManualTripDialogOpen} onOpenChange={setIsManualTripDialogOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Manuelle Fahrt erstellen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="manual-driver">Fahrer *</Label>
+              <Input
+                id="manual-driver"
+                value={manualTrip.driver}
+                onChange={(e) => setManualTrip(prev => ({ ...prev, driver: e.target.value }))}
+                placeholder="Fahrername"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="start-location">Startort *</Label>
+              <Input
+                id="start-location"
+                value={manualTrip.startLocation}
+                onChange={(e) => setManualTrip(prev => ({ ...prev, startLocation: e.target.value }))}
+                placeholder="z.B. München Büro"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="end-location">Zielort *</Label>
+              <Input
+                id="end-location"
+                value={manualTrip.endLocation}
+                onChange={(e) => setManualTrip(prev => ({ ...prev, endLocation: e.target.value }))}
+                placeholder="z.B. Frankfurt Kunde"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="distance">Distanz (km) *</Label>
+              <Input
+                id="distance"
+                type="number"
+                step="0.1"
+                value={manualTrip.distance}
+                onChange={(e) => setManualTrip(prev => ({ ...prev, distance: e.target.value }))}
+                placeholder="42.5"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="purpose">Zweck</Label>
+              <Select value={manualTrip.purpose} onValueChange={(value) => setManualTrip(prev => ({ ...prev, purpose: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Geschäftlich">Geschäftlich</SelectItem>
+                  <SelectItem value="Privat">Privat</SelectItem>
+                  <SelectItem value="Arbeitsweg">Arbeitsweg</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="manual-notes">Notizen</Label>
+              <Textarea
+                id="manual-notes"
+                value={manualTrip.notes}
+                onChange={(e) => setManualTrip(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Zusätzliche Informationen..."
+                rows={2}
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsManualTripDialogOpen(false)} className="flex-1">
+                Abbrechen
+              </Button>
+              <Button onClick={handleManualTrip} className="flex-1">
+                Fahrt erstellen
               </Button>
             </div>
           </div>
