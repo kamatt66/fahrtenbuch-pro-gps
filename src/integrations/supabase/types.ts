@@ -65,6 +65,63 @@ export type Database = {
         }
         Relationships: []
       }
+      fuel_records: {
+        Row: {
+          created_at: string
+          date: string
+          fuel_amount: number
+          fuel_type: string
+          gas_station: string
+          id: string
+          location: string | null
+          notes: string | null
+          odometer_reading: number | null
+          price_per_liter: number
+          receipt_image_url: string | null
+          receipt_number: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          fuel_amount: number
+          fuel_type: string
+          gas_station: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          price_per_liter: number
+          receipt_image_url?: string | null
+          receipt_number?: string | null
+          total_amount: number
+          updated_at?: string
+          user_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          fuel_amount?: number
+          fuel_type?: string
+          gas_station?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          price_per_liter?: number
+          receipt_image_url?: string | null
+          receipt_number?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           bluetooth_device: string | null

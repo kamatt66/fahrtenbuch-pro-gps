@@ -6,6 +6,7 @@ import DriverManagement from "@/components/DriverManagement";
 import TripRecorder from "@/components/TripRecorder";
 import TripList from "@/components/TripList";
 import CostManagement from "@/components/CostManagement";
+import FuelManagement from "@/components/FuelManagement";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -29,8 +30,7 @@ const Home = () => {
       case "fuel":
         return (
           <div className="p-6">
-            <h1 className="text-3xl font-bold mb-4">Tanken</h1>
-            <p className="text-muted-foreground">Tankbelege und Kraftstoffverwaltung wird bald verfügbar sein...</p>
+            <FuelManagement />
           </div>
         );
       case "costs":
