@@ -33,6 +33,12 @@ const Home = () => {
             <p className="text-muted-foreground">Tankbelege und Kraftstoffverwaltung wird bald verfügbar sein...</p>
           </div>
         );
+      case "costs":
+        return (
+          <div className="p-6">
+            <CostManagement />
+          </div>
+        );
       case "statistics":
         return (
           <div className="p-6">
