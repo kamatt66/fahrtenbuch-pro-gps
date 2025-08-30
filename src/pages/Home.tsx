@@ -8,6 +8,7 @@ import TripList from "@/components/TripList";
 import CostManagement from "@/components/CostManagement";
 import FuelManagement from "@/components/FuelManagement";
 import SettingsManagement from "@/components/SettingsManagement";
+import Statistics from "@/components/Statistics";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -41,12 +42,7 @@ const Home = () => {
           </div>
         );
       case "statistics":
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold mb-4">Statistiken</h1>
-            <p className="text-muted-foreground">Erweiterte Statistiken werden bald verfügbar sein...</p>
-          </div>
-        );
+        return <Statistics />;
       case "settings":
         return (
           <div className="p-6">
