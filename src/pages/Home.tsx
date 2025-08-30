@@ -9,9 +9,13 @@ import CostManagement from "@/components/CostManagement";
 import FuelManagement from "@/components/FuelManagement";
 import SettingsManagement from "@/components/SettingsManagement";
 import Statistics from "@/components/Statistics";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const { signOut, user } = useAuth();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -57,7 +61,24 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="lg:ml-64">{renderContent()}</div>
+      <div className="lg:ml-64">
+        {/* User info and logout */}
+        <div className="bg-card border-b px-6 py-3 flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            Angemeldet als: {user?.email}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="w-4 h-4" />
+            Abmelden
+          </Button>
+        </div>
+        {renderContent()}
+      </div>
     </div>
   );
 };
