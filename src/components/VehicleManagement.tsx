@@ -32,13 +32,18 @@ const VehicleManagement = () => {
     }
 
     const vehicleData = {
-      ...newVehicle,
+      name: newVehicle.name,
+      brand: newVehicle.brand,
+      model: newVehicle.model,
+      plate: newVehicle.plate,
+      fuel: newVehicle.fuel,
+      year: newVehicle.year,
+      consumption: newVehicle.consumption,
       status: 'active' as const,
       initial_km: newVehicle.initialKm,
       total_km: newVehicle.initialKm,
-      monthly_km: 0
+      monthly_km: 0,
     };
-
     const result = await addVehicle(vehicleData);
     
     if (result) {
