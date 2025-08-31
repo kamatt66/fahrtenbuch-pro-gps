@@ -35,25 +35,26 @@ const StatCard = ({ title, value, icon, description, trend, gradient = "bg-gradi
 
 const Dashboard = ({ onTabChange }: DashboardProps) => {
   const { vehicles, loading } = useVehicles();
-  const { trips, activeTrip, currentDistance } = useTrips();
+  const { trips } = useTrips();
   const { fuelRecords } = useFuelRecords();
 
   // Calculate current km for each vehicle based on trips and DB totals
   const calculateCurrentKm = (v: { id: string; initial_km: number; total_km: number }) => {
     // Nur abgeschlossene Fahrten für dieses Fahrzeug
     const completedTrips = trips.filter(trip => 
-      trip.vehicle_id === v.id && 
-      !trip.is_active && 
-      trip.distance_km != null && 
-      trip.distance_km > 0
+      trip.vehicle_id === v.id &&
+      !trip.is_active &&
+      trip.end_time != null &&
+      trip.distance_km != null &&
+      Number(trip.distance_km) > 0
     );
     
-    const drivenKm = completedTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0);
+    const drivenKm = completedTrips.reduce((sum, trip) => sum + Number(trip.distance_km || 0), 0);
     const currentKm = v.initial_km + drivenKm;
     
     console.log(`Fahrzeug ${v.id}: Initial=${v.initial_km}, Gefahren=${drivenKm.toFixed(1)} (${completedTrips.length} Trips), Aktuell=${currentKm.toFixed(1)}`);
     
-    return Math.round(currentKm);
+    return Math.max(v.initial_km, Math.round(currentKm));
   };
 
   // Calculate statistics
