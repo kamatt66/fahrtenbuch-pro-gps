@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Car, Plus, Edit, Trash2, Fuel, Calendar, Wrench } from "lucide-react";
 import { useVehicles, type Vehicle } from "@/hooks/useVehicles";
@@ -93,6 +94,13 @@ const VehicleManagement = () => {
     if (result) {
       setEditingVehicle(null);
       setIsEditDialogOpen(false);
+    }
+  };
+
+  const handleDeleteVehicle = async (vehicleId: string, vehicleName: string) => {
+    const success = await deleteVehicle(vehicleId);
+    if (success) {
+      toast.success(`Fahrzeug "${vehicleName}" wurde erfolgreich gelöscht`);
     }
   };
 
@@ -453,14 +461,35 @@ const VehicleManagement = () => {
                   <Edit className="w-4 h-4 mr-2" />
                   Bearbeiten
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => deleteVehicle(vehicle.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Fahrzeug löschen</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Sind Sie sicher, dass Sie das Fahrzeug "{vehicle.name}" ({vehicle.plate}) löschen möchten? 
+                        Diese Aktion kann nicht rückgängig gemacht werden.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                      <AlertDialogAction 
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleDeleteVehicle(vehicle.id, vehicle.name)}
+                      >
+                        Löschen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
