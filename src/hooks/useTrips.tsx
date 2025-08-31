@@ -60,6 +60,22 @@ export const useTrips = () => {
   // Get current location
   const getCurrentLocation = useCallback(async (): Promise<LocationCoords | null> => {
     try {
+      console.log('📍 Checking GPS permissions...');
+      const perm = await Geolocation.checkPermissions();
+      const states = Object.values(perm) as Array<string>;
+      const granted = states.includes('granted');
+
+      if (!granted) {
+        console.log('🔐 Requesting GPS permissions...');
+        const requested = await Geolocation.requestPermissions();
+        const reqStates = Object.values(requested) as Array<string>;
+        const reqGranted = reqStates.includes('granted');
+        if (!reqGranted) {
+          toast.error('GPS-Berechtigung verweigert');
+          return null;
+        }
+      }
+
       console.log('📍 Requesting GPS position...');
       const position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
@@ -78,9 +94,9 @@ export const useTrips = () => {
       console.error('❌ GPS Error:', error);
       let errorMessage = 'Standort konnte nicht ermittelt werden';
       
-      if (error.message?.includes('permission')) {
+      if ((error as any).message?.includes('permission')) {
         errorMessage = 'GPS-Berechtigung fehlt. Bitte in den Einstellungen aktivieren.';
-      } else if (error.message?.includes('timeout')) {
+      } else if ((error as any).message?.includes('timeout')) {
         errorMessage = 'GPS-Timeout. Bitte versuchen Sie es erneut.';
       }
       

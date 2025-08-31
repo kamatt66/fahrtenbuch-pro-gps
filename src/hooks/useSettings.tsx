@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { Geolocation } from '@capacitor/geolocation';
 
 export interface AppSettings {
   gpsTracking: boolean;
@@ -137,28 +138,40 @@ export const useSettings = () => {
     }
   }, []);
 
-  // Get GPS permission status
+  // Get GPS permission status (Capacitor-aware)
   const getGPSPermissionStatus = useCallback(async () => {
     try {
-      const result = await navigator.permissions.query({ name: 'geolocation' });
-      return result.state;
+      const perm = await Geolocation.checkPermissions();
+      const states = Object.values(perm) as Array<string>;
+      if (states.includes('granted')) return 'granted';
+      if (states.includes('denied')) return 'denied';
+      return 'prompt';
     } catch (error) {
       console.error('Error checking GPS permission:', error);
       return 'prompt';
     }
   }, []);
 
-  // Request GPS permission
+  // Request GPS permission (Capacitor-aware)
   const requestGPSPermission = useCallback(async () => {
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: settings.gpsAccuracy === 'high',
-          timeout: 10000,
-          maximumAge: 60000
-        });
+      const current = await Geolocation.checkPermissions();
+      const currentStates = Object.values(current) as Array<string>;
+      if (!currentStates.includes('granted')) {
+        const requested = await Geolocation.requestPermissions();
+        const reqStates = Object.values(requested) as Array<string>;
+        if (!reqStates.includes('granted')) {
+          toast.error('GPS-Berechtigung verweigert');
+          return false;
+        }
+      }
+
+      await Geolocation.getCurrentPosition({
+        enableHighAccuracy: settings.gpsAccuracy === 'high',
+        timeout: 10000,
+        maximumAge: 60000
       });
-      
+
       toast.success('GPS-Berechtigung erteilt');
       return true;
     } catch (error) {
