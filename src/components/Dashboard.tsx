@@ -19,7 +19,7 @@ interface StatCardProps {
   iconColor?: string;
 }
 
-const StatCard = ({ title, value, icon, description, trend, gradient = "bg-gradient-card", iconColor = "text-white" }: StatCardProps) => (
+const StatCard = ({ title, value, icon, description, trend, gradient = "bg-gradient-to-br from-blue-500 to-blue-600", iconColor = "text-white" }: StatCardProps) => (
   <Card className={`${gradient} shadow-card border-0 hover:shadow-glow transition-all duration-300 hover:scale-105`}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
       <CardTitle className="text-xs font-medium text-white/90">{title}</CardTitle>
@@ -128,7 +128,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           value={stats.totalTrips.toString()}
           icon={<MapPin className="h-4 w-4" />}
           description="Diesen Monat"
-          gradient="bg-gradient-blue"
+          gradient="bg-gradient-to-br from-blue-500 to-blue-600"
           iconColor="text-white"
         />
         <StatCard
@@ -136,7 +136,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           value={`${stats.totalDistance} km`}
           icon={<Car className="h-4 w-4" />}
           description="Diesen Monat"
-          gradient="bg-gradient-green"
+          gradient="bg-gradient-to-br from-green-500 to-green-600"
           iconColor="text-white"
         />
         <StatCard
@@ -144,7 +144,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           value={`€${stats.totalFuelCost.toFixed(2)}`}
           icon={<Fuel className="h-4 w-4" />}
           description="Diesen Monat"
-          gradient="bg-gradient-orange"
+          gradient="bg-gradient-to-br from-orange-500 to-orange-600"
           iconColor="text-white"
         />
         <StatCard
@@ -152,7 +152,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
           value={`${stats.avgConsumption} L/100km`}
           icon={<BarChart3 className="h-4 w-4" />}
           description="Letzte 30 Tage"
-          gradient="bg-gradient-purple"
+          gradient="bg-gradient-to-br from-purple-500 to-purple-600"
           iconColor="text-white"
         />
       </div>
@@ -161,7 +161,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       <Card className="shadow-card border-0 bg-gradient-to-br from-card to-muted">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center text-lg">
-            <div className="bg-gradient-blue p-2 rounded-lg mr-3">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg mr-3">
               <MapPin className="w-4 h-4 text-white" />
             </div>
             Letzte Fahrten
@@ -233,7 +233,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       <Card className="shadow-card border-0 bg-gradient-to-br from-card to-muted">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center text-lg">
-            <div className="bg-gradient-green p-2 rounded-lg mr-3">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-lg mr-3">
               <Car className="w-4 h-4 text-white" />
             </div>
             Meine Fahrzeuge

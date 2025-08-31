@@ -81,7 +81,11 @@ export default {
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-card': 'var(--gradient-card)', 
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-blue': 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+				'gradient-green': 'linear-gradient(135deg, #10b981, #059669)',
+				'gradient-orange': 'linear-gradient(135deg, #f97316, #ea580c)',
+				'gradient-purple': 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
 			},
 			boxShadow: {
 				'elegant': 'var(--shadow-elegant)',
