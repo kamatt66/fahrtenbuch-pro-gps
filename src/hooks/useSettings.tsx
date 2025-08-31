@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 export interface AppSettings {
   gpsTracking: boolean;
@@ -138,13 +139,26 @@ export const useSettings = () => {
     }
   }, []);
 
-  // Get GPS permission status (Capacitor-aware)
+  // Get GPS permission status (web + native)
   const getGPSPermissionStatus = useCallback(async () => {
     try {
-      const perm = await Geolocation.checkPermissions();
-      const states = Object.values(perm) as Array<string>;
-      if (states.includes('granted')) return 'granted';
-      if (states.includes('denied')) return 'denied';
+      if (Capacitor.getPlatform() === 'web') {
+        try {
+          const anyNavigator = navigator as any;
+          if (anyNavigator?.permissions?.query) {
+            const result = await anyNavigator.permissions.query({ name: 'geolocation' as PermissionName });
+            return result.state as PermissionState; // 'granted' | 'denied' | 'prompt'
+          }
+        } catch {
+          // ignore and fall through
+        }
+        return 'prompt';
+      }
+
+      const perm: any = await Geolocation.checkPermissions();
+      const state = perm?.location ?? (Object.values(perm)[0] as string);
+      if (state === 'granted') return 'granted';
+      if (state === 'denied') return 'denied';
       return 'prompt';
     } catch (error) {
       console.error('Error checking GPS permission:', error);
@@ -152,15 +166,34 @@ export const useSettings = () => {
     }
   }, []);
 
-  // Request GPS permission (Capacitor-aware)
+  // Request GPS permission (web + native)
   const requestGPSPermission = useCallback(async () => {
     try {
-      const current = await Geolocation.checkPermissions();
-      const currentStates = Object.values(current) as Array<string>;
-      if (!currentStates.includes('granted')) {
-        const requested = await Geolocation.requestPermissions();
-        const reqStates = Object.values(requested) as Array<string>;
-        if (!reqStates.includes('granted')) {
+      if (Capacitor.getPlatform() === 'web') {
+        // Trigger browser prompt by requesting position
+        await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            reject,
+            {
+              enableHighAccuracy: settings.gpsAccuracy === 'high',
+              timeout: 10000,
+              maximumAge: 60000
+            }
+          );
+        });
+
+        toast.success('GPS-Berechtigung erteilt');
+        return true;
+      }
+
+      // Native (iOS/Android)
+      const current: any = await Geolocation.checkPermissions();
+      const currentState = current?.location ?? (Object.values(current)[0] as string);
+      if (currentState !== 'granted') {
+        const requested: any = await Geolocation.requestPermissions();
+        const reqState = requested?.location ?? (Object.values(requested)[0] as string);
+        if (reqState !== 'granted') {
           toast.error('GPS-Berechtigung verweigert');
           return false;
         }
@@ -174,7 +207,27 @@ export const useSettings = () => {
 
       toast.success('GPS-Berechtigung erteilt');
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      // If web throws UNIMPLEMENTED, fall back to browser API
+      if (error?.message?.includes('Not implemented on web')) {
+        try {
+          await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              resolve,
+              reject,
+              {
+                enableHighAccuracy: settings.gpsAccuracy === 'high',
+                timeout: 10000,
+                maximumAge: 60000
+              }
+            );
+          });
+          toast.success('GPS-Berechtigung erteilt');
+          return true;
+        } catch (e) {
+          console.error('Web geolocation fallback failed:', e);
+        }
+      }
       console.error('GPS permission denied:', error);
       toast.error('GPS-Berechtigung verweigert');
       return false;

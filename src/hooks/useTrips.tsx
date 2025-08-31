@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 
 interface Trip {
@@ -60,16 +61,33 @@ export const useTrips = () => {
   // Get current location
   const getCurrentLocation = useCallback(async (): Promise<LocationCoords | null> => {
     try {
+      if (Capacitor.getPlatform() === 'web') {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            reject,
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+          );
+        });
+
+        const coords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        setCurrentLocation(coords);
+        return coords;
+      }
+
       console.log('📍 Checking GPS permissions...');
-      const perm = await Geolocation.checkPermissions();
-      const states = Object.values(perm) as Array<string>;
-      const granted = states.includes('granted');
+      const perm: any = await Geolocation.checkPermissions();
+      const state = perm?.location ?? (Object.values(perm)[0] as string);
+      const granted = state === 'granted';
 
       if (!granted) {
         console.log('🔐 Requesting GPS permissions...');
-        const requested = await Geolocation.requestPermissions();
-        const reqStates = Object.values(requested) as Array<string>;
-        const reqGranted = reqStates.includes('granted');
+        const requested: any = await Geolocation.requestPermissions();
+        const reqState = requested?.location ?? (Object.values(requested)[0] as string);
+        const reqGranted = reqState === 'granted';
         if (!reqGranted) {
           toast.error('GPS-Berechtigung verweigert');
           return null;
@@ -90,13 +108,14 @@ export const useTrips = () => {
       
       setCurrentLocation(coords);
       return coords;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ GPS Error:', error);
       let errorMessage = 'Standort konnte nicht ermittelt werden';
       
-      if ((error as any).message?.includes('permission')) {
-        errorMessage = 'GPS-Berechtigung fehlt. Bitte in den Einstellungen aktivieren.';
-      } else if ((error as any).message?.includes('timeout')) {
+      const msg: string = error?.message || '';
+      if (msg.includes('permission') || msg.includes('Not implemented on web')) {
+        errorMessage = 'GPS-Berechtigung fehlt. Bitte im Browser/den App-Einstellungen erlauben.';
+      } else if (msg.includes('timeout')) {
         errorMessage = 'GPS-Timeout. Bitte versuchen Sie es erneut.';
       }
       
