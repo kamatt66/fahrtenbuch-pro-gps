@@ -263,7 +263,8 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium text-foreground">
+                    <div className="text-xs text-muted-foreground mb-1">Aktueller Stand</div>
+                    <div className="font-bold text-lg text-foreground">
                       {v.total_km.toLocaleString()} km
                     </div>
                     <span className="text-xs px-2 py-1 rounded bg-success/20 text-success border-success/30">
