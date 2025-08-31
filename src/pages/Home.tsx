@@ -27,21 +27,21 @@ const Home = () => {
         return <DriverManagement />;
       case "trips":
         return (
-          <div className="p-6 space-y-6">
-            <h1 className="text-3xl font-bold mb-4">Fahrtaufzeichnung</h1>
+          <div className="p-4 space-y-4">
+            <h1 className="text-2xl font-bold mb-3">Fahrtaufzeichnung</h1>
             <TripRecorder />
             <TripList />
           </div>
         );
       case "fuel":
         return (
-          <div className="p-6">
+          <div className="p-4">
             <FuelManagement />
           </div>
         );
       case "costs":
         return (
-          <div className="p-6">
+          <div className="p-4">
             <CostManagement />
           </div>
         );
@@ -49,7 +49,7 @@ const Home = () => {
         return <Statistics />;
       case "settings":
         return (
-          <div className="p-6">
+          <div className="p-4">
             <SettingsManagement />
           </div>
         );

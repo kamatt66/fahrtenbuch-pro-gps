@@ -15,18 +15,20 @@ interface StatCardProps {
   icon: React.ReactNode;
   description?: string;
   trend?: string;
+  gradient?: string;
+  iconColor?: string;
 }
 
-const StatCard = ({ title, value, icon, description, trend }: StatCardProps) => (
-  <Card className="bg-gradient-card shadow-elegant border-0 hover:shadow-glow transition-all duration-300">
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      <div className="text-automotive-accent">{icon}</div>
+const StatCard = ({ title, value, icon, description, trend, gradient = "bg-gradient-card", iconColor = "text-white" }: StatCardProps) => (
+  <Card className={`${gradient} shadow-card border-0 hover:shadow-glow transition-all duration-300 hover:scale-105`}>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+      <CardTitle className="text-xs font-medium text-white/90">{title}</CardTitle>
+      <div className={`${iconColor} bg-white/20 p-1.5 rounded-lg`}>{icon}</div>
     </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold text-foreground">{value}</div>
-      {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
-      {trend && <p className="text-xs text-success mt-1">{trend}</p>}
+    <CardContent className="pt-1">
+      <div className="text-xl font-bold text-white">{value}</div>
+      {description && <p className="text-xs text-white/80 mt-0.5">{description}</p>}
+      {trend && <p className="text-xs text-white/90 mt-0.5">{trend}</p>}
     </CardContent>
   </Card>
 );
@@ -82,34 +84,37 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="bg-gradient-primary rounded-lg p-6 text-primary-foreground shadow-elegant">
-        <h1 className="text-3xl font-bold mb-2">Fahrtenbuch Dashboard</h1>
-        <p className="text-primary-foreground/80">Willkommen zurück! Hier ist Ihre Fahrtübersicht.</p>
+      <div className="bg-gradient-primary rounded-xl p-4 text-primary-foreground shadow-elegant">
+        <h1 className="text-2xl font-bold mb-1">Fahrtenbuch Dashboard</h1>
+        <p className="text-primary-foreground/80 text-sm">Willkommen zurück! Hier ist Ihre Fahrtübersicht.</p>
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         <Button 
-          className="bg-gradient-accent text-accent-foreground hover:opacity-90 transition-all"
+          className="bg-gradient-accent text-accent-foreground hover:opacity-90 transition-all hover:scale-105"
           onClick={handleNewTrip}
+          size="sm"
         >
           <Plus className="w-4 h-4 mr-2" />
           Neue Fahrt
         </Button>
         <Button 
           variant="outline" 
-          className="border-automotive-light hover:bg-automotive-light transition-colors"
+          className="border-automotive-light hover:bg-automotive-light transition-colors hover:scale-105"
           onClick={handleFuelRecord}
+          size="sm"
         >
           <Fuel className="w-4 h-4 mr-2" />
           Tanken erfassen
         </Button>
         <Button 
           variant="outline" 
-          className="border-automotive-light hover:bg-automotive-light transition-colors"
+          className="border-automotive-light hover:bg-automotive-light transition-colors hover:scale-105"
           onClick={handleShowRoute}
+          size="sm"
         >
           <MapPin className="w-4 h-4 mr-2" />
           Route anzeigen
@@ -117,38 +122,48 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       </div>
 
       {/* Statistics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           title="Gesamte Fahrten"
           value={stats.totalTrips.toString()}
           icon={<MapPin className="h-4 w-4" />}
           description="Diesen Monat"
+          gradient="bg-gradient-blue"
+          iconColor="text-white"
         />
         <StatCard
           title="Gefahrene Kilometer"
           value={`${stats.totalDistance} km`}
           icon={<Car className="h-4 w-4" />}
           description="Diesen Monat"
+          gradient="bg-gradient-green"
+          iconColor="text-white"
         />
         <StatCard
           title="Kraftstoffkosten"
           value={`€${stats.totalFuelCost.toFixed(2)}`}
           icon={<Fuel className="h-4 w-4" />}
           description="Diesen Monat"
+          gradient="bg-gradient-orange"
+          iconColor="text-white"
         />
         <StatCard
           title="Ø Verbrauch"
           value={`${stats.avgConsumption} L/100km`}
           icon={<BarChart3 className="h-4 w-4" />}
           description="Letzte 30 Tage"
+          gradient="bg-gradient-purple"
+          iconColor="text-white"
         />
       </div>
 
       {/* Recent Trips */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <MapPin className="w-5 h-5 mr-2 text-automotive-accent" />
+      <Card className="shadow-card border-0 bg-gradient-to-br from-card to-muted">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-lg">
+            <div className="bg-gradient-blue p-2 rounded-lg mr-3">
+              <MapPin className="w-4 h-4 text-white" />
+            </div>
             Letzte Fahrten
           </CardTitle>
         </CardHeader>
@@ -215,10 +230,12 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       </Card>
 
       {/* Vehicles Overview */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Car className="w-5 h-5 mr-2 text-automotive-accent" />
+      <Card className="shadow-card border-0 bg-gradient-to-br from-card to-muted">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-lg">
+            <div className="bg-gradient-green p-2 rounded-lg mr-3">
+              <Car className="w-4 h-4 text-white" />
+            </div>
             Meine Fahrzeuge
           </CardTitle>
         </CardHeader>

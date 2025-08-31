@@ -48,10 +48,22 @@ All colors MUST be HSL.
     --automotive-light: 215 30% 85%;
     --automotive-accent: 150 60% 45%;
     
+    /* Colorful accents for cards */
+    --card-blue: 215 85% 60%;
+    --card-green: 150 70% 50%;
+    --card-orange: 38 95% 60%;
+    --card-purple: 270 75% 65%;
+    --card-red: 0 85% 65%;
+    --card-teal: 180 75% 55%;
+    
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
     --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(150 50% 55%));
+    --gradient-blue: linear-gradient(135deg, hsl(var(--card-blue)), hsl(215 75% 70%));
+    --gradient-green: linear-gradient(135deg, hsl(var(--card-green)), hsl(150 60% 60%));
+    --gradient-orange: linear-gradient(135deg, hsl(var(--card-orange)), hsl(38 85% 70%));
+    --gradient-purple: linear-gradient(135deg, hsl(var(--card-purple)), hsl(270 65% 75%));
     
     /* Shadows */
     --shadow-elegant: 0 8px 32px -8px hsl(var(--primary) / 0.15);
