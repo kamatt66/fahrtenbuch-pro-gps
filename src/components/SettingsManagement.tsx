@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,10 +47,19 @@ const SettingsManagement = () => {
     setGpsPermissionStatus(status);
   };
 
+  // Automatisch GPS-Berechtigung beim Laden prüfen
+  useEffect(() => {
+    checkGPSPermission();
+  }, []);
+
   const handleRequestGPS = async () => {
     const granted = await requestGPSPermission();
     if (granted) {
       setGpsPermissionStatus('granted');
+      toast.success('GPS-Berechtigung erfolgreich erteilt');
+    } else {
+      // Status nach fehlgeschlagener Anfrage erneut prüfen
+      await checkGPSPermission();
     }
   };
 
