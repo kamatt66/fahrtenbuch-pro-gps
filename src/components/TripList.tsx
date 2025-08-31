@@ -82,7 +82,8 @@ const TripList = () => {
       purpose: editingTrip.purpose,
       notes: editingTrip.notes,
       start_location: editingTrip.start_location,
-      end_location: editingTrip.end_location
+      end_location: editingTrip.end_location,
+      distance_km: editingTrip.distance_km
     });
 
     setEditingTrip(null);
@@ -155,10 +156,15 @@ const TripList = () => {
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <span>{formatDuration(trip.start_time, trip.end_time)}</span>
                   </div>
-                  {trip.distance_km && (
+                  {trip.distance_km ? (
                     <div className="flex items-center gap-2">
                       <NavigationIcon className="w-4 h-4 text-muted-foreground" />
                       <span>{trip.distance_km.toFixed(1)} km</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <NavigationIcon className="w-4 h-4" />
+                      <span>Keine Distanz</span>
                     </div>
                   )}
                 </div>
@@ -290,6 +296,24 @@ const TripList = () => {
                   })}
                   placeholder="z.B. Hamburg"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-distance">Kilometer (laut Tacho)</Label>
+                <Input
+                  id="edit-distance"
+                  type="number"
+                  step="0.1"
+                  value={editingTrip.distance_km || ''}
+                  onChange={(e) => setEditingTrip({
+                    ...editingTrip,
+                    distance_km: parseFloat(e.target.value) || null
+                  })}
+                  placeholder="42.5"
+                />
+                <div className="text-xs text-muted-foreground mt-1">
+                  Korrigieren Sie hier die GPS-Entfernung mit dem tatsächlichen Tachostand
+                </div>
               </div>
 
               <div>

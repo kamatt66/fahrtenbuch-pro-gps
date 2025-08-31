@@ -239,6 +239,9 @@ const TripRecorder = () => {
                 rows={3}
               />
             </div>
+            <div className="text-sm text-muted-foreground bg-warning/10 p-3 rounded-md">
+              <p><strong>Hinweis:</strong> Die GPS-Distanz ist oft ungenau. Sie können die Kilometer nach dem Beenden manuell in der Fahrtenliste korrigieren.</p>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setIsEndTripDialogOpen(false)} className="flex-1">
                 Abbrechen
