@@ -60,11 +60,13 @@ export const useTrips = () => {
   // Get current location
   const getCurrentLocation = useCallback(async (): Promise<LocationCoords | null> => {
     try {
+      console.log('📍 Requesting GPS position...');
       const position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
-        timeout: 10000
+        timeout: 15000
       });
       
+      console.log('📍 GPS position received:', position.coords);
       const coords = {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude
@@ -73,8 +75,16 @@ export const useTrips = () => {
       setCurrentLocation(coords);
       return coords;
     } catch (error) {
-      console.error('Error getting location:', error);
-      toast.error('Standort konnte nicht ermittelt werden');
+      console.error('❌ GPS Error:', error);
+      let errorMessage = 'Standort konnte nicht ermittelt werden';
+      
+      if (error.message?.includes('permission')) {
+        errorMessage = 'GPS-Berechtigung fehlt. Bitte in den Einstellungen aktivieren.';
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = 'GPS-Timeout. Bitte versuchen Sie es erneut.';
+      }
+      
+      toast.error(errorMessage);
       return null;
     }
   }, []);
@@ -85,30 +95,43 @@ export const useTrips = () => {
     vehicleId?: string
   ) => {
     try {
+      console.log('🚗 Starting trip with driver:', driverName);
+      
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔐 Auth check - user:', user ? 'authenticated' : 'not authenticated');
       if (!user) throw new Error('No authenticated user');
 
+      console.log('📍 Requesting location...');
       const location = await getCurrentLocation();
+      console.log('📍 Location received:', location);
       if (!location) {
         throw new Error('Standort erforderlich');
       }
 
+      console.log('💾 Inserting trip to database...');
+      const tripData = {
+        driver_name: driverName,
+        start_latitude: location.latitude,
+        start_longitude: location.longitude,
+        vehicle_id: vehicleId,
+        is_active: true,
+        purpose: 'Geschäftlich',
+        user_id: user.id
+      };
+      console.log('💾 Trip data:', tripData);
+
       const { data, error } = await supabase
         .from('trips')
-        .insert({
-          driver_name: driverName,
-          start_latitude: location.latitude,
-          start_longitude: location.longitude,
-          vehicle_id: vehicleId,
-          is_active: true,
-          purpose: 'Geschäftlich',
-          user_id: user.id
-        })
+        .insert(tripData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error:', error);
+        throw error;
+      }
 
+      console.log('✅ Trip saved:', data);
       setActiveTrip(data);
       setIsTracking(true);
       toast.success('Fahrt gestartet');
@@ -116,8 +139,8 @@ export const useTrips = () => {
       // Reload trips to update list
       loadTrips();
     } catch (error) {
-      console.error('Error starting trip:', error);
-      toast.error('Fehler beim Starten der Fahrt');
+      console.error('❌ Error starting trip:', error);
+      toast.error(`Fehler beim Starten der Fahrt: ${error.message}`);
     }
   }, [getCurrentLocation, loadTrips]);
 
