@@ -171,6 +171,18 @@ export const useTrips = () => {
       setActiveTrip(data);
       setIsTracking(true);
       setCurrentDistance(0); // Reset distance counter
+
+      // Ersten Routenpunkt mit Startposition speichern
+      try {
+        await supabase.from('route_points').insert({
+          trip_id: data.id,
+          latitude: data.start_latitude,
+          longitude: data.start_longitude,
+        });
+      } catch (e) {
+        console.warn('Konnte Start-Routenpunkt nicht speichern:', e);
+      }
+      
       toast.success('Fahrt gestartet');
       
       // Reload trips to update list
@@ -378,79 +390,108 @@ export const useTrips = () => {
 
   // Watch for location changes during active trip
   useEffect(() => {
-    let watchId: string | null = null;
+    let nativeWatchId: string | null = null;
+    let webWatchId: number | null = null;
     let lastPosition: LocationCoords | null = null;
     let routeDistance = 0;
 
-    if (isTracking && activeTrip) {
-      const startWatching = async () => {
-        try {
-          watchId = await Geolocation.watchPosition(
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 5000 // Reduziert für häufigere Updates
-            },
-            async (position) => {
-              if (position) {
-                const newPosition = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude
-                };
-                
-                setCurrentLocation(newPosition);
-                
-                // Berechne Distanz zum letzten Punkt und speichere Routenpunkt
-                if (lastPosition) {
-                  const segmentDistance = calculateDistance(
-                    lastPosition.latitude,
-                    lastPosition.longitude,
-                    newPosition.latitude,
-                    newPosition.longitude
-                  );
-                  
-                  // Nur speichern wenn mindestens 10 Meter Unterschied (Rauschen reduzieren)
-                  if (segmentDistance > 0.01) {
-                    routeDistance += segmentDistance;
-                    setCurrentDistance(routeDistance); // Update live distance
-                    
-                    // Routenpunkt in Datenbank speichern
-                    try {
-                      await supabase
-                        .from('route_points')
-                        .insert({
-                          trip_id: activeTrip.id,
-                          latitude: newPosition.latitude,
-                          longitude: newPosition.longitude,
-                          accuracy: position.coords.accuracy || null,
-                          speed: position.coords.speed || null
-                        });
-                      
-                      console.log(`📍 Routenpunkt gespeichert. Gesamtdistanz: ${routeDistance.toFixed(2)} km`);
-                    } catch (error) {
-                      console.error('Fehler beim Speichern des Routenpunkts:', error);
-                    }
-                    
-                    lastPosition = newPosition;
-                  }
-                } else {
-                  // Ersten Punkt als Startpunkt setzen
-                  lastPosition = newPosition;
-                }
-              }
-            }
-          );
-        } catch (error) {
-          console.error('Error starting location watch:', error);
-        }
+    const processPosition = async (position: GeolocationPosition) => {
+      const newPosition = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
       };
 
-      startWatching();
-    }
+      setCurrentLocation(newPosition);
+
+      if (!activeTrip) return;
+
+      // Distanz zum letzten Punkt und Routenpunkt speichern
+      if (lastPosition) {
+        const segmentDistance = calculateDistance(
+          lastPosition.latitude,
+          lastPosition.longitude,
+          newPosition.latitude,
+          newPosition.longitude
+        );
+        // Nur speichern wenn mindestens 10 Meter Unterschied
+        if (segmentDistance > 0.01) {
+          routeDistance += segmentDistance;
+          setCurrentDistance(routeDistance);
+          try {
+            await supabase.from('route_points').insert({
+              trip_id: activeTrip.id,
+              latitude: newPosition.latitude,
+              longitude: newPosition.longitude,
+              accuracy: position.coords.accuracy || null,
+              speed: position.coords.speed || null
+            });
+          } catch (e) {
+            console.error('Fehler beim Speichern des Routenpunkts:', e);
+          }
+          lastPosition = newPosition;
+        }
+      } else {
+        lastPosition = newPosition;
+      }
+    };
+
+    const startWatching = async () => {
+      if (!(isTracking && activeTrip)) return;
+      try {
+        // Seed: letzte bekannten Punkt und bereits gefahrene Distanz laden (für Fortsetzen nach App-Neustart)
+        try {
+          const { data: points } = await supabase
+            .from('route_points')
+            .select('latitude, longitude, recorded_at')
+            .eq('trip_id', activeTrip.id)
+            .order('recorded_at', { ascending: true });
+          if (points && points.length > 0) {
+            // Start mit bereits aufgezeichneter Distanz
+            for (let i = 1; i < points.length; i++) {
+              routeDistance += calculateDistance(
+                Number(points[i - 1].latitude),
+                Number(points[i - 1].longitude),
+                Number(points[i].latitude),
+                Number(points[i].longitude)
+              );
+            }
+            setCurrentDistance(routeDistance);
+            const lp = points[points.length - 1];
+            lastPosition = { latitude: Number(lp.latitude), longitude: Number(lp.longitude) };
+          } else if (activeTrip.start_latitude && activeTrip.start_longitude) {
+            lastPosition = { latitude: activeTrip.start_latitude, longitude: activeTrip.start_longitude };
+          }
+        } catch (e) {
+          console.warn('Seed der Routenpunkte fehlgeschlagen:', e);
+        }
+
+        const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 } as const;
+
+        if (Capacitor.getPlatform() === 'web') {
+          webWatchId = navigator.geolocation.watchPosition(
+            (pos) => processPosition(pos),
+            (err) => console.error('Web watchPosition error:', err),
+            options
+          );
+        } else {
+          nativeWatchId = await Geolocation.watchPosition(
+            options,
+            (pos) => { if (pos) processPosition(pos as any as GeolocationPosition); }
+          );
+        }
+      } catch (error) {
+        console.error('Error starting location watch:', error);
+      }
+    };
+
+    startWatching();
 
     return () => {
-      if (watchId) {
-        Geolocation.clearWatch({ id: watchId });
+      if (nativeWatchId) {
+        Geolocation.clearWatch({ id: nativeWatchId });
+      }
+      if (webWatchId != null) {
+        navigator.geolocation.clearWatch(webWatchId);
       }
     };
   }, [isTracking, activeTrip]);
