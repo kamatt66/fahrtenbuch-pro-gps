@@ -11,29 +11,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Play, 
   Square, 
-  Bluetooth, 
   MapPin, 
   Clock, 
   Car,
-  Settings,
   Plus,
   Trash2
 } from 'lucide-react';
-import { useBluetooth } from '@/hooks/useBluetooth';
 import { useTrips } from '@/hooks/useTrips';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 
 const TripRecorder = () => {
-  const {
-    devices,
-    connectedDevice,
-    isSupported,
-    scanForDevices,
-    connectToDevice,
-    disconnectDevice
-  } = useBluetooth();
-
   const {
     activeTrip,
     isTracking,
@@ -47,7 +35,6 @@ const TripRecorder = () => {
   const { settings } = useSettings();
 
   const [driverName, setDriverName] = useState('');
-  const [isBluetoothDialogOpen, setIsBluetoothDialogOpen] = useState(false);
   const [endTripNotes, setEndTripNotes] = useState('');
   const [isEndTripDialogOpen, setIsEndTripDialogOpen] = useState(false);
   const [isManualTripDialogOpen, setIsManualTripDialogOpen] = useState(false);
@@ -67,27 +54,6 @@ const TripRecorder = () => {
     }
   }, [settings.defaultDriver, driverName]);
 
-  // Auto-start trip when Bluetooth device connects (if enabled in settings)
-  useEffect(() => {
-    if (settings.autoStartTrips && connectedDevice && !isTracking) {
-      const startAutoTrip = async () => {
-        await startTrip(driverName || settings.defaultDriver, connectedDevice.name, connectedDevice.id);
-        toast.success(`Automatische Fahrt gestartet (${connectedDevice.name})`);
-      };
-      startAutoTrip();
-    }
-  }, [connectedDevice, isTracking, settings.autoStartTrips, driverName, settings.defaultDriver, startTrip]);
-
-  // Auto-end trip when Bluetooth device disconnects (if enabled in settings)
-  useEffect(() => {
-    if (settings.autoStopTrips && !connectedDevice && isTracking && activeTrip?.bluetooth_device) {
-      const endAutoTrip = async () => {
-        await endTrip('Automatisch beendet (Bluetooth getrennt)');
-        toast.info('Fahrt automatisch beendet');
-      };
-      endAutoTrip();
-    }
-  }, [connectedDevice, isTracking, activeTrip, settings.autoStopTrips, endTrip]);
 
   const handleStartTrip = async () => {
     if (!driverName.trim()) {
@@ -95,11 +61,7 @@ const TripRecorder = () => {
       return;
     }
     
-    await startTrip(
-      driverName,
-      connectedDevice?.name,
-      connectedDevice?.id
-    );
+    await startTrip(driverName);
   };
 
   const handleEndTrip = async () => {
@@ -151,58 +113,6 @@ const TripRecorder = () => {
 
   return (
     <div className="space-y-6">
-      {/* Bluetooth Status */}
-      <Card className="border-automotive-light bg-gradient-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bluetooth className="w-5 h-5 text-automotive-accent" />
-            Bluetooth Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!isSupported && (
-            <div className="text-warning bg-warning/10 p-3 rounded-lg">
-              Bluetooth wird auf diesem Gerät nicht unterstützt
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {connectedDevice ? (
-                <>
-                  <Badge className="bg-success/20 text-success">Verbunden</Badge>
-                  <span className="font-medium">{connectedDevice.name}</span>
-                </>
-              ) : (
-                <Badge variant="outline">Nicht verbunden</Badge>
-              )}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setIsBluetoothDialogOpen(true)}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Verwalten
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={settings.autoStartTrips}
-              onChange={(e) => toast.info('Einstellung in den App-Einstellungen ändern')}
-              id="autoStart"
-              className="rounded"
-              disabled
-            />
-            <Label htmlFor="autoStart" className="text-sm">
-              Automatisch starten/stoppen bei Bluetooth-Verbindung
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Trip Recording */}
       <Card className={`border-2 transition-all ${
         isTracking 
@@ -270,9 +180,7 @@ const TripRecorder = () => {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-sm text-muted-foreground">Fahrzeug</Label>
-                  <div className="font-medium">
-                    {activeTrip?.bluetooth_device || 'Manuell'}
-                  </div>
+                  <div className="font-medium">GPS</div>
                 </div>
               </div>
 
@@ -313,51 +221,6 @@ const TripRecorder = () => {
         </CardContent>
       </Card>
 
-      {/* Bluetooth Management Dialog */}
-      <Dialog open={isBluetoothDialogOpen} onOpenChange={setIsBluetoothDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Bluetooth Geräte verwalten</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Button onClick={scanForDevices} className="w-full">
-              Nach Geräten suchen
-            </Button>
-            
-            <div className="space-y-2">
-              {devices.map((device) => (
-                <div key={device.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <div className="font-medium">{device.name}</div>
-                    <div className="text-sm text-muted-foreground">{device.id}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {device.connected && (
-                      <Badge className="bg-success/20 text-success">Verbunden</Badge>
-                    )}
-                    <Button
-                      size="sm"
-                      variant={device.connected ? "outline" : "default"}
-                      onClick={() => device.connected 
-                        ? disconnectDevice() 
-                        : connectToDevice(device.id)
-                      }
-                    >
-                      {device.connected ? 'Trennen' : 'Verbinden'}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {devices.length === 0 && (
-              <div className="text-center text-muted-foreground py-4">
-                Keine Geräte gefunden. Stellen Sie sicher, dass Bluetooth aktiviert ist.
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* End Trip Dialog */}
       <Dialog open={isEndTripDialogOpen} onOpenChange={setIsEndTripDialogOpen}>

@@ -82,7 +82,6 @@ export const useTrips = () => {
   // Start a new trip
   const startTrip = useCallback(async (
     driverName: string,
-    bluetoothDevice?: string,
     vehicleId?: string
   ) => {
     try {
@@ -100,7 +99,6 @@ export const useTrips = () => {
           driver_name: driverName,
           start_latitude: location.latitude,
           start_longitude: location.longitude,
-          bluetooth_device: bluetoothDevice,
           vehicle_id: vehicleId,
           is_active: true,
           purpose: 'Geschäftlich',
