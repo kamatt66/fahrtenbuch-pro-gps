@@ -35,7 +35,7 @@ const StatCard = ({ title, value, icon, description, trend, gradient = "bg-gradi
 
 const Dashboard = ({ onTabChange }: DashboardProps) => {
   const { vehicles, loading } = useVehicles();
-  const { trips } = useTrips();
+  const { trips, activeTrip, currentDistance } = useTrips();
   const { fuelRecords } = useFuelRecords();
 
   // Calculate current km for each vehicle based on trips and DB totals
@@ -43,8 +43,9 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
     const drivenKm = trips
       .filter((trip) => trip.vehicle_id === v.id && trip.distance_km != null)
       .reduce((sum, trip) => sum + Number(trip.distance_km || 0), 0);
+    const liveKm = activeTrip && activeTrip.vehicle_id === v.id ? currentDistance : 0;
 
-    const computed = v.initial_km + drivenKm;
+    const computed = v.initial_km + drivenKm + liveKm;
     // Safeguard: never show less than DB total_km
     return Math.max(v.total_km || 0, Math.round(computed));
   };
