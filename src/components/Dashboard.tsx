@@ -40,14 +40,20 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
 
   // Calculate current km for each vehicle based on trips and DB totals
   const calculateCurrentKm = (v: { id: string; initial_km: number; total_km: number }) => {
-    const drivenKm = trips
-      .filter((trip) => trip.vehicle_id === v.id && trip.distance_km != null)
-      .reduce((sum, trip) => sum + Number(trip.distance_km || 0), 0);
-    const liveKm = activeTrip && activeTrip.vehicle_id === v.id ? currentDistance : 0;
-
-    const computed = v.initial_km + drivenKm + liveKm;
-    // Safeguard: never show less than DB total_km
-    return Math.max(v.total_km || 0, Math.round(computed));
+    // Nur abgeschlossene Fahrten für dieses Fahrzeug
+    const completedTrips = trips.filter(trip => 
+      trip.vehicle_id === v.id && 
+      !trip.is_active && 
+      trip.distance_km != null && 
+      trip.distance_km > 0
+    );
+    
+    const drivenKm = completedTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0);
+    const currentKm = v.initial_km + drivenKm;
+    
+    console.log(`Fahrzeug ${v.id}: Initial=${v.initial_km}, Gefahren=${drivenKm.toFixed(1)} (${completedTrips.length} Trips), Aktuell=${currentKm.toFixed(1)}`);
+    
+    return Math.round(currentKm);
   };
 
   // Calculate statistics
