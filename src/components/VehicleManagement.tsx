@@ -85,6 +85,7 @@ const VehicleManagement = () => {
       year: editingVehicle.year,
       consumption: editingVehicle.consumption,
       status: editingVehicle.status,
+      total_km: editingVehicle.total_km,
     };
 
     const result = await updateVehicle(editingVehicle.id, updates);
@@ -318,6 +319,16 @@ const VehicleManagement = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div>
+                  <Label htmlFor="edit-total-km">Aktueller Kilometerstand</Label>
+                  <Input
+                    id="edit-total-km"
+                    type="number"
+                    value={editingVehicle.total_km}
+                    onChange={(e) => setEditingVehicle({...editingVehicle, total_km: parseInt(e.target.value) || 0})}
+                    placeholder="125000"
+                  />
                 </div>
                 <Button onClick={handleUpdateVehicle} className="w-full">
                   Fahrzeug aktualisieren

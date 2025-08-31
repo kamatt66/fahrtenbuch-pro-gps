@@ -236,7 +236,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
             <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-lg mr-3">
               <Car className="w-4 h-4 text-white" />
             </div>
-            Meine Fahrzeuge
+            Aktive Fahrzeuge
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -252,9 +252,9 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
                 </p>
               </div>
             </div>
-          ) : (
+           ) : (
             <ul className="divide-y divide-border">
-              {vehicles.slice(0, 5).map((v) => (
+              {vehicles.filter(v => v.status === 'active').slice(0, 5).map((v) => (
                 <li key={v.id} className="py-3 flex items-center justify-between">
                   <div>
                     <p className="font-medium text-foreground">{v.name}</p>
@@ -262,13 +262,18 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
                       {v.brand ?? '-'} {v.model ?? ''} • {v.plate}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded bg-automotive-light text-foreground/80">
-                    {v.status}
-                  </span>
+                  <div className="text-right">
+                    <div className="font-medium text-foreground">
+                      {v.total_km.toLocaleString()} km
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded bg-success/20 text-success border-success/30">
+                      Aktiv
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
-          )}
+           )}
         </CardContent>
       </Card>
     </div>
