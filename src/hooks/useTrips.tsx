@@ -33,6 +33,7 @@ export const useTrips = () => {
   const [activeTrip, setActiveTrip] = useState<Trip | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<LocationCoords | null>(null);
+  const [currentDistance, setCurrentDistance] = useState<number>(0);
 
   // Load trips from database
   const loadTrips = useCallback(async () => {
@@ -169,6 +170,7 @@ export const useTrips = () => {
       console.log('✅ Trip saved:', data);
       setActiveTrip(data);
       setIsTracking(true);
+      setCurrentDistance(0); // Reset distance counter
       toast.success('Fahrt gestartet');
       
       // Reload trips to update list
@@ -187,15 +189,46 @@ export const useTrips = () => {
       const location = await getCurrentLocation();
       const endTime = new Date().toISOString();
       
-      // Calculate distance if we have both start and end coordinates
-      let distance = null;
-      if (location && activeTrip.start_latitude && activeTrip.start_longitude) {
+      // Berechne die tatsächliche Distanz aus den Routenpunkten
+      let actualDistance = 0;
+      try {
+        const { data: routePoints, error: routeError } = await supabase
+          .from('route_points')
+          .select('latitude, longitude, recorded_at')
+          .eq('trip_id', activeTrip.id)
+          .order('recorded_at', { ascending: true });
+
+        if (routeError) {
+          console.error('Fehler beim Laden der Routenpunkte:', routeError);
+        } else if (routePoints && routePoints.length > 1) {
+          // Berechne Gesamtdistanz aus allen Routenpunkten
+          for (let i = 1; i < routePoints.length; i++) {
+            const prev = routePoints[i - 1];
+            const curr = routePoints[i];
+            const segmentDistance = calculateDistance(
+              prev.latitude,
+              prev.longitude,
+              curr.latitude,
+              curr.longitude
+            );
+            actualDistance += segmentDistance;
+          }
+          console.log(`🛣️ Tatsächliche Routendistanz: ${actualDistance.toFixed(2)} km`);
+        }
+      } catch (error) {
+        console.error('Fehler bei Distanzberechnung:', error);
+      }
+
+      // Fallback auf Luftlinie wenn keine Routenpunkte vorhanden
+      let distance = actualDistance;
+      if (distance === 0 && location && activeTrip.start_latitude && activeTrip.start_longitude) {
         distance = calculateDistance(
           activeTrip.start_latitude,
           activeTrip.start_longitude,
           location.latitude,
           location.longitude
         );
+        console.log(`📏 Fallback Luftlinie: ${distance.toFixed(2)} km`);
       }
 
       const { error } = await supabase
@@ -204,7 +237,7 @@ export const useTrips = () => {
           end_latitude: location?.latitude,
           end_longitude: location?.longitude,
           end_time: endTime,
-          distance_km: distance,
+          distance_km: distance > 0 ? distance : null,
           notes: notes,
           is_active: false
         })
@@ -214,7 +247,12 @@ export const useTrips = () => {
 
       setActiveTrip(null);
       setIsTracking(false);
-      toast.success(`Fahrt beendet${distance ? ` (${distance.toFixed(1)} km)` : ''}`);
+      setCurrentDistance(0); // Reset distance counter
+      
+      const distanceMessage = distance > 0 
+        ? ` (${distance.toFixed(1)} km ${actualDistance > 0 ? '- Tatsächliche Route' : '- Luftlinie'})` 
+        : '';
+      toast.success(`Fahrt beendet${distanceMessage}`);
       
       // Reload trips to update list
       loadTrips();
@@ -341,6 +379,8 @@ export const useTrips = () => {
   // Watch for location changes during active trip
   useEffect(() => {
     let watchId: string | null = null;
+    let lastPosition: LocationCoords | null = null;
+    let routeDistance = 0;
 
     if (isTracking && activeTrip) {
       const startWatching = async () => {
@@ -349,14 +389,54 @@ export const useTrips = () => {
             {
               enableHighAccuracy: true,
               timeout: 10000,
-              maximumAge: 30000
+              maximumAge: 5000 // Reduziert für häufigere Updates
             },
-            (position) => {
+            async (position) => {
               if (position) {
-                setCurrentLocation({
+                const newPosition = {
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude
-                });
+                };
+                
+                setCurrentLocation(newPosition);
+                
+                // Berechne Distanz zum letzten Punkt und speichere Routenpunkt
+                if (lastPosition) {
+                  const segmentDistance = calculateDistance(
+                    lastPosition.latitude,
+                    lastPosition.longitude,
+                    newPosition.latitude,
+                    newPosition.longitude
+                  );
+                  
+                  // Nur speichern wenn mindestens 10 Meter Unterschied (Rauschen reduzieren)
+                  if (segmentDistance > 0.01) {
+                    routeDistance += segmentDistance;
+                    setCurrentDistance(routeDistance); // Update live distance
+                    
+                    // Routenpunkt in Datenbank speichern
+                    try {
+                      await supabase
+                        .from('route_points')
+                        .insert({
+                          trip_id: activeTrip.id,
+                          latitude: newPosition.latitude,
+                          longitude: newPosition.longitude,
+                          accuracy: position.coords.accuracy || null,
+                          speed: position.coords.speed || null
+                        });
+                      
+                      console.log(`📍 Routenpunkt gespeichert. Gesamtdistanz: ${routeDistance.toFixed(2)} km`);
+                    } catch (error) {
+                      console.error('Fehler beim Speichern des Routenpunkts:', error);
+                    }
+                    
+                    lastPosition = newPosition;
+                  }
+                } else {
+                  // Ersten Punkt als Startpunkt setzen
+                  lastPosition = newPosition;
+                }
               }
             }
           );
@@ -380,6 +460,7 @@ export const useTrips = () => {
     activeTrip,
     isTracking,
     currentLocation,
+    currentDistance,
     startTrip,
     endTrip,
     updateTrip,

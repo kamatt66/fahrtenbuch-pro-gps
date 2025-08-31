@@ -26,6 +26,7 @@ const TripRecorder = () => {
     activeTrip,
     isTracking,
     currentLocation,
+    currentDistance,
     startTrip,
     endTrip,
     createManualTrip,
@@ -197,14 +198,21 @@ const TripRecorder = () => {
                 <div className="space-y-1">
                   <Label className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    Position
+                    Gefahren
                   </Label>
-                  <div className="text-sm">
-                    {currentLocation 
-                      ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}`
-                      : 'Wird ermittelt...'
-                    }
+                  <div className="font-medium text-lg text-success">
+                    {currentDistance.toFixed(1)} km
                   </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Label className="text-sm text-muted-foreground">Aktuelle Position</Label>
+                <div className="text-sm">
+                  {currentLocation 
+                    ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}`
+                    : 'Wird ermittelt...'
+                  }
                 </div>
               </div>
 
@@ -239,8 +247,8 @@ const TripRecorder = () => {
                 rows={3}
               />
             </div>
-            <div className="text-sm text-muted-foreground bg-warning/10 p-3 rounded-md">
-              <p><strong>Hinweis:</strong> Die GPS-Distanz ist oft ungenau. Sie können die Kilometer nach dem Beenden manuell in der Fahrtenliste korrigieren.</p>
+            <div className="text-sm text-muted-foreground bg-info/10 p-3 rounded-md">
+              <p><strong>Tatsächliche Route:</strong> Die App zeichnet kontinuierlich GPS-Punkte auf und berechnet die tatsächlich gefahrene Strecke. Bei Bedarf können Sie die Kilometer später in der Fahrtenliste noch korrigieren.</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setIsEndTripDialogOpen(false)} className="flex-1">
