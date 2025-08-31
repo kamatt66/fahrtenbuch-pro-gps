@@ -38,6 +38,17 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
   const { trips } = useTrips();
   const { fuelRecords } = useFuelRecords();
 
+  // Calculate current km for each vehicle based on trips
+  const calculateCurrentKm = (vehicleId: string, initialKm: number) => {
+    const vehicleTrips = trips.filter(trip => 
+      trip.vehicle_id === vehicleId && 
+      !trip.is_active && 
+      trip.distance_km
+    );
+    const drivenKm = vehicleTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0);
+    return initialKm + drivenKm;
+  };
+
   // Calculate statistics
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();
@@ -265,7 +276,7 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
                   <div className="text-right">
                     <div className="text-xs text-muted-foreground mb-1">Aktueller Stand</div>
                     <div className="font-bold text-lg text-foreground">
-                      {v.total_km.toLocaleString()} km
+                      {Math.round(calculateCurrentKm(v.id, v.initial_km)).toLocaleString()} km
                     </div>
                     <span className="text-xs px-2 py-1 rounded bg-success/20 text-success border-success/30">
                       Aktiv
