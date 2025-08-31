@@ -26,9 +26,16 @@ export const useVehicles = () => {
 
   const fetchVehicles = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setVehicles([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('vehicles')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -93,11 +100,16 @@ export const useVehicles = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating vehicle:', error);
         toast.error('Fehler beim Aktualisieren des Fahrzeugs');
+        return null;
+      }
+
+      if (!data) {
+        toast.error('Fahrzeug nicht gefunden oder keine Berechtigung');
         return null;
       }
 

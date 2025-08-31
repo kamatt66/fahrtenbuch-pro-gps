@@ -9,10 +9,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Car, Plus, Edit, Trash2, Fuel, Calendar, Wrench } from "lucide-react";
 import { useVehicles, type Vehicle } from "@/hooks/useVehicles";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 const VehicleManagement = () => {
   const { vehicles, loading, addVehicle, updateVehicle, deleteVehicle } = useVehicles();
+  const { user } = useAuth();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -461,35 +463,46 @@ const VehicleManagement = () => {
                   <Edit className="w-4 h-4 mr-2" />
                   Bearbeiten
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Fahrzeug löschen</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Sind Sie sicher, dass Sie das Fahrzeug "{vehicle.name}" ({vehicle.plate}) löschen möchten? 
-                        Diese Aktion kann nicht rückgängig gemacht werden.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                      <AlertDialogAction 
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => handleDeleteVehicle(vehicle.id, vehicle.name)}
+                {(vehicle.user_id === user?.id) ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
-                        Löschen
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Fahrzeug löschen</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Sind Sie sicher, dass Sie das Fahrzeug "{vehicle.name}" ({vehicle.plate}) löschen möchten? 
+                          Diese Aktion kann nicht rückgängig gemacht werden.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDeleteVehicle(vehicle.id, vehicle.name)}
+                        >
+                          Löschen
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-muted-foreground cursor-not-allowed opacity-50"
+                    onClick={() => toast.error('Sie können nur eigene Fahrzeuge löschen')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
