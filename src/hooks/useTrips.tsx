@@ -330,6 +330,7 @@ export const useTrips = () => {
     distance: number;
     purpose: string;
     notes: string | null;
+    vehicleId?: string;
   }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -350,7 +351,8 @@ export const useTrips = () => {
           start_time: oneHourAgo.toISOString(),
           end_time: now.toISOString(),
           is_active: false,
-          user_id: user.id
+          user_id: user.id,
+          vehicle_id: tripData.vehicleId ?? null,
         });
 
       if (error) throw error;

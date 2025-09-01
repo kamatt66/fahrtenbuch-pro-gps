@@ -72,9 +72,9 @@ const Dashboard = ({ onTabChange }: DashboardProps) => {
       return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
     });
 
-    const totalDistance = currentMonthTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0);
-    const totalFuelCost = currentMonthFuel.reduce((sum, record) => sum + (record.total_amount || 0), 0);
-    const totalFuelAmount = currentMonthFuel.reduce((sum, record) => sum + (record.fuel_amount || 0), 0);
+    const totalDistance = currentMonthTrips.reduce((sum, trip) => sum + Number(trip.distance_km || 0), 0);
+    const totalFuelCost = currentMonthFuel.reduce((sum, record) => sum + Number(record.total_amount || 0), 0);
+    const totalFuelAmount = currentMonthFuel.reduce((sum, record) => sum + Number(record.fuel_amount || 0), 0);
     
     const avgConsumption = totalDistance > 0 && totalFuelAmount > 0 
       ? (totalFuelAmount / totalDistance) * 100 

@@ -58,6 +58,7 @@ const TripRecorder = () => {
     purpose: 'Geschäftlich',
     notes: ''
   });
+  const [manualVehicleId, setManualVehicleId] = useState<string>('');
 
   // Load default driver from settings
   useEffect(() => {
@@ -69,8 +70,11 @@ const TripRecorder = () => {
   // Standard-Fahrzeug vorauswählen
   useEffect(() => {
     const firstActive = vehicles.find(v => v.status === 'active');
-    if (!selectedVehicleId && firstActive) setSelectedVehicleId(firstActive.id);
-  }, [vehicles, selectedVehicleId]);
+    if (firstActive) {
+      if (!selectedVehicleId) setSelectedVehicleId(firstActive.id);
+      if (!manualVehicleId) setManualVehicleId(firstActive.id);
+    }
+  }, [vehicles, selectedVehicleId, manualVehicleId]);
 
   const handleStartTrip = async () => {
     if (!driverName.trim()) {
@@ -95,6 +99,10 @@ const TripRecorder = () => {
       toast.error('Bitte füllen Sie alle Pflichtfelder aus');
       return;
     }
+    if (!manualVehicleId) {
+      toast.error('Bitte wählen Sie ein Fahrzeug aus');
+      return;
+    }
 
     await createManualTrip({
       driverName: manualTrip.driver,
@@ -102,7 +110,8 @@ const TripRecorder = () => {
       endLocation: manualTrip.endLocation,
       distance: parseFloat(manualTrip.distance),
       purpose: manualTrip.purpose,
-      notes: manualTrip.notes || null
+      notes: manualTrip.notes || null,
+      vehicleId: manualVehicleId,
     });
 
     setManualTrip({
@@ -113,6 +122,7 @@ const TripRecorder = () => {
       purpose: 'Geschäftlich',
       notes: ''
     });
+    setManualVehicleId('');
     setIsManualTripDialogOpen(false);
   };
 
@@ -356,6 +366,22 @@ const TripRecorder = () => {
                 onChange={(e) => setManualTrip(prev => ({ ...prev, driver: e.target.value }))}
                 placeholder="Fahrername"
               />
+            </div>
+            
+            <div>
+              <Label htmlFor="manual-vehicle">Fahrzeug *</Label>
+              <Select value={manualVehicleId} onValueChange={(value) => setManualVehicleId(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Fahrzeug auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicles.filter(v => v.status === 'active').map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name} • {v.plate}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
