@@ -21,6 +21,7 @@ import { useTrips } from '@/hooks/useTrips';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import { useVehicles } from '@/hooks/useVehicles';
+import { useAutoTracking } from '@/hooks/useAutoTracking';
 
 const TripRecorder = () => {
   const {
@@ -37,6 +38,12 @@ const TripRecorder = () => {
   const { vehicles } = useVehicles();
 
   const { settings } = useSettings();
+
+  const { 
+    isMonitoring, 
+    currentSpeed, 
+    averageSpeed 
+  } = useAutoTracking();
 
   const [driverName, setDriverName] = useState('');
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
@@ -257,6 +264,49 @@ const TripRecorder = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Auto-Tracking Status */}
+      {(settings.autoStartTrips || settings.autoStopTrips) && (
+        <Card className={`border-2 transition-all ${
+          isMonitoring 
+            ? 'border-info bg-info/5 shadow-glow' 
+            : 'border-muted bg-muted/20'
+        }`}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <div className={`w-2 h-2 rounded-full ${isMonitoring ? 'bg-info animate-pulse' : 'bg-muted'}`} />
+              Automatische Erkennung
+              {isMonitoring && <Badge className="bg-info/20 text-info border-info/30">Überwacht</Badge>}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Aktuelle Geschwindigkeit</Label>
+                <div className="font-medium text-lg">
+                  {currentSpeed.toFixed(1)} km/h
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Durchschnitt (2 Min)</Label>
+                <div className="font-medium text-lg">
+                  {averageSpeed.toFixed(1)} km/h
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded">
+              {settings.autoStartTrips && settings.autoStopTrips ? (
+                <p>Automatisches Starten ({'>'}10 km/h) und Stoppen ({'<'}5 km/h) aktiv</p>
+              ) : settings.autoStartTrips ? (
+                <p>Nur automatisches Starten ({'>'}10 km/h) aktiv</p>
+              ) : settings.autoStopTrips ? (
+                <p>Nur automatisches Stoppen ({'<'}5 km/h) aktiv</p>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
 
       {/* End Trip Dialog */}

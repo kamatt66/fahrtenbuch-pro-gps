@@ -174,7 +174,7 @@ const SettingsManagement = () => {
                   <div className="space-y-1">
                     <Label className="text-base font-medium">Automatisch starten</Label>
                     <p className="text-sm text-muted-foreground">
-                      Fahrten automatisch bei Bewegung starten
+                      Fahrten automatisch bei Bewegung starten ({'>'}10 km/h für 2 Min)
                     </p>
                   </div>
                   <Switch
@@ -187,7 +187,7 @@ const SettingsManagement = () => {
                   <div className="space-y-1">
                     <Label className="text-base font-medium">Automatisch stoppen</Label>
                     <p className="text-sm text-muted-foreground">
-                      Fahrten automatisch bei Stillstand beenden
+                      Fahrten automatisch bei Stillstand beenden (&lt;5 km/h für 5 Min)
                     </p>
                   </div>
                   <Switch
@@ -195,6 +195,18 @@ const SettingsManagement = () => {
                     onCheckedChange={(checked) => updateSetting('autoStopTrips', checked)}
                   />
                 </div>
+
+                {(settings.autoStartTrips || settings.autoStopTrips) && (
+                  <div className="bg-info/10 p-3 rounded-lg border border-info/20">
+                    <h4 className="font-medium text-sm mb-2 text-info">🤖 Automatische Aufzeichnung</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Startet Fahrt bei {'>'}10 km/h Durchschnittsgeschwindigkeit über 2 Minuten</li>
+                      <li>• Stoppt Fahrt bei &lt;5 km/h Durchschnittsgeschwindigkeit über 5 Minuten</li>
+                      <li>• Verwendet Standard-Fahrer und -Fahrzeug aus den Einstellungen</li>
+                      <li>• Funktioniert im Hintergrund bei aktivierter App</li>
+                    </ul>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
