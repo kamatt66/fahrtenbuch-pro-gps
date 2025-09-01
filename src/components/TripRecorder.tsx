@@ -20,6 +20,7 @@ import {
 import { useTrips } from '@/hooks/useTrips';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
+import { useVehicles } from '@/hooks/useVehicles';
 
 const TripRecorder = () => {
   const {
@@ -33,9 +34,12 @@ const TripRecorder = () => {
     deleteAllTrips
   } = useTrips();
 
+  const { vehicles } = useVehicles();
+
   const { settings } = useSettings();
 
   const [driverName, setDriverName] = useState('');
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
   const [endTripNotes, setEndTripNotes] = useState('');
   const [isEndTripDialogOpen, setIsEndTripDialogOpen] = useState(false);
   const [isManualTripDialogOpen, setIsManualTripDialogOpen] = useState(false);
@@ -55,14 +59,22 @@ const TripRecorder = () => {
     }
   }, [settings.defaultDriver, driverName]);
 
+  // Standard-Fahrzeug vorauswählen
+  useEffect(() => {
+    const firstActive = vehicles.find(v => v.status === 'active');
+    if (!selectedVehicleId && firstActive) setSelectedVehicleId(firstActive.id);
+  }, [vehicles, selectedVehicleId]);
 
   const handleStartTrip = async () => {
     if (!driverName.trim()) {
       toast.error('Bitte geben Sie einen Fahrernamen ein');
       return;
     }
-    
-    await startTrip(driverName);
+    if (!selectedVehicleId) {
+      toast.error('Bitte wählen Sie ein Fahrzeug aus');
+      return;
+    }
+    await startTrip(driverName, selectedVehicleId);
   };
 
   const handleEndTrip = async () => {
@@ -139,12 +151,27 @@ const TripRecorder = () => {
                   placeholder="Fahrername eingeben"
                 />
               </div>
+              <div>
+                <Label htmlFor="vehicle">Fahrzeug</Label>
+                <Select value={selectedVehicleId} onValueChange={(value) => setSelectedVehicleId(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Fahrzeug auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicles.filter(v => v.status === 'active').map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.name} • {v.plate}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               <div className="space-y-2">
                 <Button
                   onClick={handleStartTrip}
                   className="w-full bg-success hover:bg-success/90 text-success-foreground"
-                  disabled={!driverName.trim()}
+                  disabled={!driverName.trim() || !selectedVehicleId}
                 >
                   <Play className="w-4 h-4 mr-2" />
                   Fahrt starten (GPS)
@@ -181,7 +208,9 @@ const TripRecorder = () => {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-sm text-muted-foreground">Fahrzeug</Label>
-                  <div className="font-medium">GPS</div>
+                  <div className="font-medium">
+                    {vehicles.find(v => v.id === activeTrip?.vehicle_id)?.name ?? 'Unbekannt'}
+                  </div>
                 </div>
               </div>
 
